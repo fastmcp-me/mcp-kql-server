@@ -58,8 +58,6 @@ MCP KQL Server eliminates the need for context-switching, making it ideal for us
 
 ### Join the Community
 
-MCP KQL Server is open-source under the MIT License, and we welcome contributions! Whether you want to add new features like query caching or advanced visualizations, join us on GitHub to make this tool even better.
-
 🌟 **Try MCP KQL Server today** and experience data analytics like never before, right within Claude!
 
 [GitHub Repository](https://github.com/yourusername/mcp-kql-server)
