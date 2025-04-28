@@ -118,10 +118,6 @@ Contributions are welcome! To contribute:
 
 Please open an issue to discuss new features or report bugs.
 
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## 📬 Contact
 
 For questions or support, open an issue on GitHub or contact [your email or preferred contact method].
