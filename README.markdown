@@ -46,7 +46,7 @@ MCP KQL Server eliminates the need for context-switching, making it ideal for us
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/yourusername/mcp-kql-server.git
+   git clone https://github.com/4R9UN/mcp-kql-server.git
    ```
 
 2. **Navigate to the Project Directory**:
