@@ -1,51 +1,13 @@
 {
   "mcpServers": {
-    "filesystem": {
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "--mount",
-        "type=bind,src=C:\\Users\\artrived.FAREAST\\Desktop,dst=/projects/Desktop",
-        "--mount",
-        "type=bind,src=C:\\Users\\artrived.FAREAST\\OneDrive - Microsoft\\office document\\My Knowladgebase,dst=/projects/KT",
-        "--mount",
-        "type=bind,src=C:\\Users\\artrived.FAREAST\\Downloads,dst=/projects/other/allowed/dir,ro",
-        "--mount",
-        "type=bind,src=C:\\Users\\artrived.FAREAST\\OneDrive - Microsoft\\office document\\My Knowladgebase,dst=/projects/path/to/file.txt",
-        "mcp/filesystem",
-        "/projects"
-      ]
-    },
-    "mcp-installer": {
-      "command": "npx",
-      "args": [
-        "@anaisbetts/mcp-installer"
-      ]
-    },
-    "mcp-server-fetch": {
-      "command": "uv",
-      "args": [
-        "mcp-server-fetch"
-      ]
-    },
-    "mcp-server-docker": {
-      "command": "uv",
-      "args": [
-        "mcp-server-docker"
-      ]
-    },
+    "mcpServers": {
     "mcp-kql-server": {
-      "command": "uv",
+      "command": "C:\\Users\\YourUsername\\mcp-kql-server\\.venv\\Scripts\\python.exe",
       "args": [
-        "python",
         "-m",
-        "waitress",
-        "--host=0.0.0.0",
-        "--port=5000",
-        "mcp_kql_server.server:app"
-      ]
+        "mcp_kql_server.mcp_server"
+        ]
+      }
     }
   }
 }
