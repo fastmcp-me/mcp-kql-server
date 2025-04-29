@@ -153,4 +153,4 @@ Please open an issue to discuss new features or report bugs.
 
 ## 📬 Contact
 
-For questions or support, open an issue on GitHub or contact [your email or preferred contact method].
+For questions or support, open an issue on GitHub or contact arjuntrivedi42@yahoo.com.
