@@ -40,11 +40,8 @@ mcp-kql-server/
 │   ├── mcp_server.py
 │   ├── kql_auth.py
 │   └── execute_kql.py
-├── claude_desktop_config.json
-├── LICENSE
 ├── pyproject.toml
 ├── README.md
-└── requirements.txt
 ```
 
 ## 🏗️ Setup Instructions
