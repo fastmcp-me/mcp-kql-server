@@ -1,127 +1,196 @@
 # 🚀 MCP KQL Server
 
-💡 **Purpose**: The MCP KQL Server enables seamless execution of KQL (Kusto Query Language) queries against Azure Data Explorer directly within Claude Desktop. It leverages Azure CLI for secure authentication and returns results in a structured table format, making data analytics accessible without leaving your Claude workflow.
+A Model Context Protocol (MCP) server for executing Kusto Query Language (KQL) queries against Azure Data Explorer clusters. Seamlessly integrates with Claude Desktop and Visual Studio Code (VS Code). Supports Azure CLI authentication and provides a convenient `kql_execute` tool for running queries directly within your AI prompts, complete with optional visualizations.
 
-🔧 **Features**:
-- **Seamless Claude Integration**: Execute KQL queries within Claude, enhancing productivity.
-- **Secure Authentication**: Uses Azure CLI for authentication, eliminating the need to manage sensitive credentials like tenant IDs.
-- **Structured Output**: Returns query results in a table format (columns, rows, row_count) for easy analysis.
-- **Data Visualization**: Optional Markdown table output for better readability in Claude.
-- **Efficient and Lightweight**: Optimized for performance with robust error handling.
+## ✨ Features
 
-## 🏗️ Installation
+- **🔍 Execute KQL Queries**: Run KQL queries directly within your AI prompts using the `kql_execute` MCP tool.
+- **⚡ Plug-and-Play Simplicity**: No manual tenant ID configuration or complex credential management. Simply authenticate via Azure CLI (`az login`) and start querying immediately.
+- **🤖 Seamless Claude Integration**: Execute KQL queries within Claude Desktop without switching interfaces or dashboards.
+- **🔒 Secure and Efficient**: Leverages Azure CLI’s robust authentication, ensuring secure credential handling and optimized query performance.
+- **📊 Visualization Ready**: Optional Markdown table outputs make data analysis intuitive and engaging.
+- **🔑 Azure CLI Authentication**: Built-in Azure CLI authentication with retry and caching logic.
+- **📡 Protocol Compatibility**: Fully compatible with MCP protocol version `2024-11-05`.
+- **🛠️ Reliable Implementation**: Uses `fastmcp` for a robust and reliable MCP server implementation.
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/yourusername/mcp-kql-server.git
-   ```
+### 📌 Comparison with Other Tools
 
-2. **Navigate to the Project Directory**:
-   ```bash
-   cd mcp-kql-server
-   ```
-
-3. **Create a Virtual Environment** (recommended):
-   ```bash
-   python -m venv .venv
-   .venv\Scripts\activate  # On Windows
-   source .venv/bin/activate  # On Linux/Mac
-   ```
-
-4. **Install Dependencies**:
-   ```bash
-   pip install -e .
-   ```
-
-## ⚙️ Setup
-
-1. **Install Azure CLI**:
-   - Download and install Azure CLI from [Azure CLI Installation](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
-   - Authenticate with Azure:
-     ```bash
-     az login
-     ```
-
-2. **Configure Claude Desktop**:
-   - Copy `claude_desktop_config.json` to your Claude configuration directory (consult Claude Desktop documentation for the exact path, e.g., `%APPDATA%\Claude`).
-   - The configuration should look like:
-     ```json
-     {
-       "mcpServers": {
-         "mcp-kql-server": {
-           "command": "C:\\Users\\YourUsername\\mcp-kql-server\\.venv\\Scripts\\python.exe",
-           "args": [
-             "-m",
-             "mcp_kql_server.mcp_server"
-           ]
-         }
-       }
-     }
-     ```
-   - Update the `command` path to match your virtual environment’s Python executable.
-
-3. **Test the Server**:
-   - Run the server manually:
-     ```bash
-     python -m mcp_kql_server.mcp_server
-     ```
-   - In Claude Desktop, use the `kql_execute` tool to run a query, e.g., `cluster('mycluster').database('mydb').MyTable | take 10`.
+| Feature                      | MCP KQL Server | Azure Data Explorer MCP | Standalone Scripts |
+|------------------------------|----------------|-------------------------|--------------------|
+| Claude Integration           | ✅             | ❌                      | ❌                 |
+| Plug-and-Play Authentication | ✅ (Azure CLI) | ❌ (Manual setup)       | ❌ (Custom code)   |
+| No Tenant ID Required        | ✅             | ❌                      | ❌                 |
+| Data Visualization           | ✅             | ✅                      | ❌                 |
+| Open-Source                  | ✅             | ✅                      | Varies             |
 
 ## 📋 Requirements
 
-| Requirement         | Version/Description                     |
-|---------------------|-----------------------------------------|
-| Python              | 3.10 or higher                         |
-| Azure CLI           | Latest version                         |
-| Dependencies        | Listed in `pyproject.toml`             |
+- Python 3.10 or higher
+- Azure Data Explorer cluster access
+- Azure CLI installed and authenticated (`az login`)
+- Node.js (optional, for Claude Desktop filesystem server)
+- VS Code with Claude extension or MCP client (for VS Code integration)
 
-## 🔍 Tools
+## 📂 Project Structure
 
-### kql_execute
-- **Description**: Executes a KQL query against an Azure Data Explorer cluster.
-- **Input**:
-  - `query` (str): The KQL query to execute (e.g., `cluster('mycluster').database('mydb').MyTable | take 10`).
-  - `visualize` (bool, optional): If true, includes a Markdown table visualization.
-- **Output**:
-  - `status` (str): "success" or "error".
-  - `result` (dict): If successful, contains:
-    - `columns` (list): Column names.
-    - `rows` (list): Query result rows.
-    - `row_count` (int): Number of rows.
-    - `visualization` (str, optional): Markdown table if `visualize` is true.
-  - `error` (str): Error message if failed.
+```
+mcp-kql-server/
+├── mcp_kql_server/
+│   ├── __init__.py
+│   ├── mcp_server.py
+│   ├── kql_auth.py
+│   └── execute_kql.py
+├── claude_desktop_config.json
+├── LICENSE
+├── pyproject.toml
+├── README.md
+└── requirements.txt
+```
 
-**Example**:
+## 🏗️ Setup Instructions
+
+### 1️⃣ Clone the Repository
+
+```bash
+git clone https://github.com/4R9UN/mcp-kql-server.git
+cd mcp-kql-server
+```
+
+### 2️⃣ Install Python 3.10+
+
+- **Windows**:
+  ```bash
+  winget install Python.Python.3.10
+  ```
+- **macOS**:
+  ```bash
+  brew install python@3.10
+  ```
+- **Linux**:
+  ```bash
+  sudo apt-get install python3.10
+  ```
+
+Verify installation:
+```bash
+python --version
+```
+
+### 3️⃣ Install Azure CLI
+
+- Follow official instructions: [Install Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
+- Log in to Azure:
+  ```bash
+  az config set core.login_experience_v2=off
+  az login
+  ```
+
+### 4️⃣ Create and Activate Virtual Environment
+
+```bash
+python -m venv .venv
+```
+
+Activate environment:
+
+- **Windows**:
+  ```bash
+  .venv\Scripts\activate
+  ```
+- **macOS/Linux**:
+  ```bash
+  source .venv/bin/activate
+  ```
+
+### 5️⃣ Install Dependencies
+
+```bash
+pip install .
+```
+
+## 🖥️ Setup for Claude Desktop
+
+- Copy `claude_desktop_config.json` to Claude's configuration directory:
+  - **Windows**: `C:\Users\YourUser\AppData\Roaming\Claude\`
+  - **macOS**: `/Users/YourUser/Library/Application Support/Claude/`
+  - **Linux**: Currently not supported by Claude Desktop.
+
+- Update the configuration file with your Python path and project directory:
+
 ```json
 {
-  "query": "cluster('mycluster').database('mydb').MyTable | take 10",
-  "visualize": true
+  "mcpServers": {
+    "mcp-kql-server": {
+      "command": "C:\\Users\\YourPath\\mcp-kql-server\\.venv\\Scripts\\python.exe",
+      "args": [
+        "-m",
+        "mcp_kql_server.mcp_server"
+      ]
+    }
+  }
 }
 ```
 
-## 🌟 Additional Features
+- Optional: Install Node.js for filesystem server support ([Node.js](https://nodejs.org/)).
+- Restart Claude Desktop.
 
-- **Data Visualization**: Query results can be formatted as Markdown tables for better readability in Claude, enabled by setting `visualize: true` in the input.
-- **Future Enhancements**:
-  - **Query Caching**: Implement caching for frequently executed queries using `functools.lru_cache` to improve performance.
-  - **Query Validation**: Add client-side validation to catch syntax errors before execution.
-  - **Advanced Visualization**: Integrate libraries like `plotly` for graphical outputs (e.g., charts) in Claude.
+## 🖱️ Setup for VS Code
+
+- Install [VS Code](https://code.visualstudio.com/).
+- Install the `Copilot MCP` client extension.
+- Modify the MCP `settings.json` with the following configuration:
+
+```json
+{
+  "mcpServers": {
+    "mcp-kql-server": {
+      "command": "C:\\Users\\YourPath\\mcp-kql-server\\.venv\\Scripts\\python.exe",
+      "args": [
+        "-m",
+        "mcp_kql_server.mcp_server"
+      ],
+      "env": {
+        "PYTHONPATH": "C:\\Users\\YourPath\\mcp-kql-server",
+        "PYTHONUNBUFFERED": "1",
+        "AZURE_CORE_ONLY_SHOW_ERRORS": "true"
+      }
+    }
+  }
+}
+```
+
+- Run the `MCP: List Servers` command in VS Code’s Command Palette to verify setup.
+- Enable autodiscovery if using Claude Desktop’s configuration.
+
+## ✅ Test the Server
+
+- **Claude Desktop**:
+  - Open Claude Desktop and provide the following prompt:
+    ```
+    Use a tool to execute the attached KQL query, visualize the results, and provide high-level insights from the query output.
+
+    KQL query: "cluster('mycluster').database('mydb').MyTable | take 10"
+    ```
 
 ## 🤝 Contributing
 
-Contributions are welcome! To contribute:
-1. Fork the repository.
-2. Create a feature branch (`git checkout -b feature/YourFeature`).
-3. Commit your changes (`git commit -m 'Add YourFeature'`).
-4. Push to the branch (`git push origin feature/YourFeature`).
-5. Open a pull request.
-
-Please open an issue to discuss new features or report bugs.
-
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- Fork the repository.
+- Create a feature branch:
+  ```bash
+  git checkout -b feature/YourFeature
+  ```
+- Commit your changes:
+  ```bash
+  git commit -m "Add YourFeature"
+  ```
+- Push to your branch:
+  ```bash
+  git push origin feature/YourFeature
+  ```
+- Open a Pull Request.
 
 ## 📬 Contact
 
-For questions or support, open an issue on GitHub or contact [your email or preferred contact method].
+For issues or questions, please open a ticket on GitHub or contact the maintainer at [arjuntrivedi42@yahoo.com](mailto:arjuntrivedi42@yahoo.com).
+
+🎉 **Happy Querying!**

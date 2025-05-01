@@ -1,0 +1,1 @@
+# Empty file to mark mcp_kql_server as a Python package
