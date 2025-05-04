@@ -2,6 +2,8 @@
 
 A Model Context Protocol (MCP) server for executing Kusto Query Language (KQL) queries against Azure Data Explorer clusters. Seamlessly integrates with Claude Desktop and Visual Studio Code (VS Code). Supports Azure CLI authentication and provides a convenient `kql_execute` tool for **execute KQL queries** directly within your **AI prompts**, complete with optional visualizations.
 
+![MCP KQL server](https://github.com/4R9UN/mcp-kql-server/blob/main/MCP%20KQL%20Server_%20Image%20.png)
+
 ## ✨ Features
 
 - **🔍 Execute KQL Queries**: Run KQL queries directly within your AI prompts using the `kql_execute` MCP tool.
