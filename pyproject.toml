@@ -2,6 +2,7 @@
    name = "mcp-kql-server"
    version = "1.0.1"
    description = "MCP server for executing KQL queries with Azure authentication"
+   authors = [{ name = "Arjun Trivedi" }]
    readme = "README.md"
    requires-python = ">=3.10"
    dependencies = [
