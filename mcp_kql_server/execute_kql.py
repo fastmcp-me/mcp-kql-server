@@ -1,3 +1,5 @@
+#   authors = [{ name = "Arjun Trivedi" }]
+
 import re
 import logging
 from azure.kusto.data import KustoClient, KustoConnectionStringBuilder
