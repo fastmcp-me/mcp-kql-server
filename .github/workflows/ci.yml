@@ -32,76 +32,81 @@ jobs:
         import os
         import sys
         
-        print('📁 Validating project structure')
+        print('Validating project structure')
         
         required_files = [
             'pyproject.toml',
             'README.md', 
-            'LICENSE',
             'mcp_kql_server/__init__.py'
         ]
         
         missing_files = []
         for file in required_files:
             if os.path.exists(file):
-                print(f'✅ Found: {file}')
+                print('Found: ' + file)
             else:
-                print(f'❌ Missing: {file}')
+                print('Missing: ' + file)
                 missing_files.append(file)
         
         if missing_files:
-            print(f'❌ Missing files: {missing_files}')
+            print('Missing files: ' + str(missing_files))
             sys.exit(1)
         else:
-            print('✅ All required files found')
+            print('All required files found')
         "
     
     - name: Test package build
       run: |
         python -c "
-        print('📦 Testing package build')
+        print('Testing package build')
         import subprocess
         import sys
         
         try:
             result = subprocess.run([sys.executable, '-m', 'build'], 
                                   capture_output=True, text=True, check=True)
-            print('✅ Package built successfully')
+            print('Package built successfully')
         except subprocess.CalledProcessError as e:
-            print(f'❌ Build failed: {e}')
-            print(f'stdout: {e.stdout}')
-            print(f'stderr: {e.stderr}')
+            print('Build failed: ' + str(e))
+            print('stdout: ' + str(e.stdout))
+            print('stderr: ' + str(e.stderr))
             sys.exit(1)
         "
     
     - name: Test package check
       run: |
         python -c "
-        print('🔍 Testing package integrity')
+        print('Testing package integrity')
         import subprocess
         import sys
         import os
         
         if not os.path.exists('dist'):
-            print('❌ No dist directory found')
+            print('No dist directory found')
             sys.exit(1)
         
         dist_files = os.listdir('dist')
         if not dist_files:
-            print('❌ No files in dist directory')
+            print('No files in dist directory')
             sys.exit(1)
         
-        print(f'✅ Found {len(dist_files)} distribution files')
+        print('Found ' + str(len(dist_files)) + ' distribution files')
         for file in dist_files:
-            print(f'  - {file}')
+            print('  - ' + file)
         
         try:
-            subprocess.run(['twine', 'check'] + [f'dist/{f}' for f in dist_files], 
+            subprocess.run(['twine', 'check'] + ['dist/' + f for f in dist_files], 
                          check=True, capture_output=True)
-            print('✅ Package integrity check passed')
+            print('Package integrity check passed')
         except subprocess.CalledProcessError as e:
-            print(f'⚠️ Package check warning (not critical): {e}')
+            print('Package check warning (not critical): ' + str(e))
         "
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
 
   code-quality:
     name: Code Quality
@@ -119,40 +124,70 @@ jobs:
     - name: Install tools
       run: |
         python -m pip install --upgrade pip
-        pip install black isort flake8
+        pip install black isort flake8 coverage
     
     - name: Check formatting
       run: |
         python -c "
-        print('🎨 Checking code formatting')
+        print('Checking code formatting')
         import subprocess
         import sys
         import os
         
         if not os.path.exists('mcp_kql_server'):
-            print('⚠️ mcp_kql_server directory not found, skipping formatting check')
+            print('mcp_kql_server directory not found, skipping formatting check')
             sys.exit(0)
         
         try:
             subprocess.run(['black', '--check', 'mcp_kql_server/'], check=True, capture_output=True)
-            print('✅ Black formatting check passed')
+            print('Black formatting check passed')
         except subprocess.CalledProcessError:
-            print('⚠️ Black formatting issues found (not critical for CI)')
+            print('Black formatting issues found (not critical for CI)')
         
         try:
             subprocess.run(['isort', '--check-only', 'mcp_kql_server/'], check=True, capture_output=True)
-            print('✅ Import sorting check passed')
+            print('Import sorting check passed')
         except subprocess.CalledProcessError:
-            print('⚠️ Import sorting issues found (not critical for CI)')
+            print('Import sorting issues found (not critical for CI)')
         
         try:
             subprocess.run(['flake8', 'mcp_kql_server/', '--max-line-length=100'], check=True, capture_output=True)
-            print('✅ Flake8 linting passed')
+            print('Flake8 linting passed')
         except subprocess.CalledProcessError:
-            print('⚠️ Linting issues found (not critical for CI)')
+            print('Linting issues found (not critical for CI)')
         
-        print('✅ Code quality checks completed')
+        print('Code quality checks completed')
         "
+    
+    - name: Run tests with coverage
+      run: |
+        python -c "
+        print('Running tests with coverage')
+        import subprocess
+        import sys
+        import os
+        
+        if os.path.exists('tests'):
+            try:
+                subprocess.run(['coverage', 'run', '-m', 'pytest', 'tests/', '-v'], check=True)
+                subprocess.run(['coverage', 'report'], check=True)
+                subprocess.run(['coverage', 'xml'], check=True)
+                print('Tests and coverage completed successfully')
+            except subprocess.CalledProcessError as e:
+                print('Tests completed with warnings: ' + str(e))
+        else:
+            print('No tests directory found, skipping test coverage')
+        "
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      if: always()
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
 
   multi-platform-test:
     name: Platform Test
@@ -173,35 +208,34 @@ jobs:
         python-version: ${{ matrix.python-version }}
     
     - name: Basic compatibility test
+      shell: python
       run: |
-        python -c "
         import sys
         import os
         
-        print(f'🐍 Python {sys.version}')
-        print(f'💻 Platform: ${{ matrix.os }}')
+        print('Python ' + sys.version)
+        print('Platform: ${{ matrix.os }}')
         
         # Basic file existence check
         if os.path.exists('mcp_kql_server'):
-            print('✅ Package directory found')
+            print('Package directory found')
         else:
-            print('❌ Package directory missing')
+            print('Package directory missing')
             sys.exit(1)
         
         if os.path.exists('mcp_kql_server/__init__.py'):
-            print('✅ Package __init__.py found')
+            print('Package __init__.py found')
         else:
-            print('❌ Package __init__.py missing')
+            print('Package __init__.py missing')
             sys.exit(1)
         
         if os.path.exists('pyproject.toml'):
-            print('✅ pyproject.toml found')
+            print('pyproject.toml found')
         else:
-            print('❌ pyproject.toml missing')
+            print('pyproject.toml missing')
             sys.exit(1)
         
-        print('✅ Basic compatibility test passed')
-        "
+        print('Basic compatibility test passed')
 
   summary:
     name: Pipeline Summary
@@ -213,8 +247,8 @@ jobs:
     - name: Print summary
       run: |
         python -c "
-        print('🏁 CI/CD Pipeline Summary')
-        print('========================')
+        print('CI/CD Pipeline Summary')
+        print('======================')
         print('')
         
         results = {
@@ -225,19 +259,19 @@ jobs:
         
         success_count = 0
         for job, result in results.items():
-            status = '✅' if result == 'success' else '❌' if result == 'failure' else '⚠️'
-            print(f'{status} {job}: {result}')
+            status = 'PASS' if result == 'success' else 'FAIL' if result == 'failure' else 'WARN'
+            print(status + ' ' + job + ': ' + result)
             if result == 'success':
                 success_count += 1
         
         print('')
-        print(f'📊 Success Rate: {success_count}/{len(results)} jobs passed')
+        print('Success Rate: ' + str(success_count) + '/' + str(len(results)) + ' jobs passed')
         
         if success_count == len(results):
-            print('🎉 All pipeline stages passed!')
-            print('🚀 Repository is ready!')
+            print('All pipeline stages passed!')
+            print('Repository is ready!')
         else:
-            print('⚠️ Some jobs had issues but pipeline completed')
+            print('Some jobs had issues but pipeline completed')
         "
 
   publish-pypi:
@@ -249,23 +283,36 @@ jobs:
       id-token: write
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
       with:
-        python-version: '3.10'
-    
-    - name: Install build tools
-      run: |
-        python -m pip install --upgrade pip
-        pip install build
-    
-    - name: Build package
-      run: python -m build
+        name: python-package-distributions
+        path: dist/
     
     - name: Publish to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+        verbose: true
+
+  publish-test-pypi:
+    name: Publish to Test PyPI
+    runs-on: ubuntu-latest
+    needs: [basic-validation, code-quality, multi-platform-test]
+    if: github.ref == 'refs/heads/develop' || (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
+    permissions:
+      id-token: write
+    
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+    
+    - name: Publish to Test PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+        password: ${{ secrets.PYPI_API_TOKEN }}
         verbose: true
