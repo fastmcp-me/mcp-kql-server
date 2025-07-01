@@ -7,7 +7,6 @@ A Model Context Protocol (MCP) server that provides intelligent KQL (Kusto Query
 <!-- Badges Section -->
 [![PyPI version](https://img.shields.io/pypi/v/mcp-kql-server.svg)](https://pypi.org/project/mcp-kql-server/)
 [![Python 3.8+](https://img.shields.io/pypi/pyversions/mcp-kql-server.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Downloads](https://img.shields.io/pypi/dm/mcp-kql-server.svg)](https://pypi.org/project/mcp-kql-server/)
 
 [![CI/CD Pipeline](https://github.com/4R9UN/mcp-kql-server/workflows/MCP%20KQL%20Server%20CI%2FCD%20Pipeline/badge.svg)](https://github.com/4R9UN/mcp-kql-server/actions)
@@ -411,25 +410,6 @@ python -m venv venv
 source venv/bin/activate
 pip install -e ".[dev]"
 ```
-
-### Running Tests
-
-```bash
-# Run all tests
-pytest
-
-# Run with coverage
-pytest --cov=mcp_kql_server --cov-report=html
-
-# Run specific test categories
-pytest -m "unit"
-pytest -m "integration"
-```
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## 🙏 Acknowledgments
 
 - [FastMCP](https://github.com/jlowin/fastmcp) - MCP server framework
