@@ -180,9 +180,6 @@ exclude = [
 [tool.bandit]
 exclude_dirs = ["tests", "new_venv", ".venv", "build", "dist"]
 skips = ["B101", "B601"]
-assert_used = {
-    skips = ["*_test.py", "*test*.py"]
-}
 
 [tool.coverage.run]
 source = ["mcp_kql_server"]
