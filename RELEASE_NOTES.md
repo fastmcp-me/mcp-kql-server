@@ -2,7 +2,7 @@
 
 > **Major Release** 🎉
 
-**Release Date**: January 1, 2025  
+**Release Date**: July 1, 2025  
 **Author**: Arjun Trivedi  
 **Repository**: https://github.com/4R9UN/mcp-kql-server
 
