@@ -1,3 +1,13 @@
+"""
+KQL Authentication Module
+
+This module handles Azure CLI authentication for KQL cluster access.
+Provides cached authentication checking and device code flow authentication.
+
+Author: Arjun Trivedi
+Email: arjuntrivedi42@yahoo.com
+"""
+
 import subprocess
 import platform
 import os
