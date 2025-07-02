@@ -34,11 +34,11 @@ jobs:
     - name: Validate project structure
       run: |
         echo "Validating project structure"
-        test -f pyproject.toml && echo "✓ pyproject.toml"
-        test -f README.md && echo "✓ README.md"
-        test -d mcp_kql_server && echo "✓ mcp_kql_server directory"
-        test -f mcp_kql_server/__init__.py && echo "✓ package __init__.py"
-        test -f mcp_kql_server/__main__.py && echo "✓ package __main__.py"
+        test -f pyproject.toml && echo "Found pyproject.toml"
+        test -f README.md && echo "Found README.md"
+        test -d mcp_kql_server && echo "Found mcp_kql_server directory"
+        test -f mcp_kql_server/__init__.py && echo "Found package __init__.py"
+        test -f mcp_kql_server/__main__.py && echo "Found package __main__.py"
         echo "All required files found"
     
     - name: Validate version consistency
@@ -52,9 +52,9 @@ jobs:
         echo "__init__.py version: $INIT_VERSION"
         
         if [ "$PYPROJECT_VERSION" = "$INIT_VERSION" ]; then
-          echo "✓ All versions are consistent: $PYPROJECT_VERSION"
+          echo "All versions are consistent: $PYPROJECT_VERSION"
         else
-          echo "❌ Version mismatch detected!"
+          echo "Version mismatch detected!"
           echo "pyproject.toml: $PYPROJECT_VERSION"
           echo "__init__.py: $INIT_VERSION"
           exit 1
@@ -65,9 +65,9 @@ jobs:
           TAG_VERSION=${GITHUB_REF#refs/tags/v}
           echo "Git tag version: $TAG_VERSION"
           if [ "$PYPROJECT_VERSION" = "$TAG_VERSION" ]; then
-            echo "✓ Tag version matches package version"
+            echo "Tag version matches package version"
           else
-            echo "❌ Tag version ($TAG_VERSION) does not match package version ($PYPROJECT_VERSION)"
+            echo "Tag version ($TAG_VERSION) does not match package version ($PYPROJECT_VERSION)"
             exit 1
           fi
         fi
@@ -76,19 +76,19 @@ jobs:
       run: |
         echo "Building package..."
         python -m build
-        echo "✓ Package built successfully"
+        echo "Package built successfully"
         ls -la dist/
         
         echo "Validating built package..."
         twine check dist/*
-        echo "✓ Package validation passed"
+        echo "Package validation passed"
     
     - name: Test module execution
       run: |
         echo "Testing module installation and import..."
         pip install dist/*.whl
-        python -c "import mcp_kql_server; print(f'✓ Package imports successfully, version: {mcp_kql_server.__version__}')"
-        echo "✓ Module execution test passed"
+        python -c "import mcp_kql_server; print(f'Package imports successfully, version: {mcp_kql_server.__version__}')"
+        echo "Module execution test passed"
     
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -104,7 +104,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: ['3.8', '3.11']
+        python-version: ['3.10', '3.11']
     
     steps:
     - name: Checkout code
@@ -120,8 +120,8 @@ jobs:
         echo "Testing pip installation on ${{ matrix.os }} with Python ${{ matrix.python-version }}"
         python -m pip install --upgrade pip
         python -m pip install .
-        python -c "import mcp_kql_server; print(f'✓ Installation successful, version: {mcp_kql_server.__version__}')"
-        echo "✓ Installation test passed"
+        python -c "import mcp_kql_server; print(f'Installation successful, version: {mcp_kql_server.__version__}')"
+        echo "Installation test passed"
 
   publish-pypi:
     name: Publish to PyPI
@@ -193,10 +193,10 @@ jobs:
     steps:
     - name: Print summary
       run: |
-        echo "🚀 MCP KQL Server CI/CD Pipeline Summary"
-        echo "========================================"
+        echo "MCP KQL Server CI/CD Pipeline Summary"
+        echo "====================================="
         echo ""
-        echo "📊 Job Results:"
+        echo "Job Results:"
         echo "  Build & Validate: ${{ needs.build-and-validate.result }}"
         echo "  Installation Test: ${{ needs.install-test.result }}"
         echo "  CodeCov Coverage: ${{ needs.codecov-coverage.result }}"
@@ -213,21 +213,21 @@ jobs:
           success_count=$((success_count + 1))
         fi
         
-        echo "✅ Success Rate: $success_count/3 core jobs passed"
+        echo "Success Rate: $success_count/3 core jobs passed"
         
         if [ $success_count -ge 2 ]; then
-          echo "🎉 Pipeline completed successfully!"
+          echo "Pipeline completed successfully!"
           
           if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
             echo ""
-            echo "🏷️  Tag detected: ${GITHUB_REF#refs/tags/}"
-            echo "📦 PyPI publishing job triggered"
+            echo "Tag detected: ${GITHUB_REF#refs/tags/}"
+            echo "PyPI publishing job triggered"
           fi
         else
-          echo "⚠️  Some jobs had issues but pipeline completed"
+          echo "Some jobs had issues but pipeline completed"
         fi
         
         echo ""
-        echo "📝 Package ready for:"
+        echo "Package ready for:"
         echo "  - pip install mcp-kql-server"
         echo "  - python -m mcp_kql_server"

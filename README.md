@@ -30,7 +30,7 @@ A Model Context Protocol (MCP) server that provides intelligent KQL (Kusto Query
 
 ## 📋 Prerequisites
 
-- Python 3.8 or higher
+- Python 3.10 or higher
 - Azure CLI installed and authenticated (`az login`)
 - Access to Azure Data Explorer cluster(s)
 
