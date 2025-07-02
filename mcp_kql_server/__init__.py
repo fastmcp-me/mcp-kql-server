@@ -15,7 +15,7 @@ import logging
 from pathlib import Path
 
 # Version information
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 __author__ = "Arjun Trivedi"
 __email__ = "arjuntrivedi42@yahoo.com"
 
