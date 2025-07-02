@@ -48,12 +48,12 @@ jobs:
         PYPROJECT_VERSION=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
         echo "pyproject.toml version: $PYPROJECT_VERSION"
         
-        # Extract version from __init__.py
-        INIT_VERSION=$(python -c "import sys; sys.path.insert(0, '.'); from mcp_kql_server import __version__; print(__version__)")
+        # Extract version from __init__.py using grep (no import needed)
+        INIT_VERSION=$(grep -E '^__version__\s*=' mcp_kql_server/__init__.py | sed 's/.*=\s*["\'"'"']\([^"'"'"']*\)["\'"'"'].*/\1/')
         echo "__init__.py version: $INIT_VERSION"
         
-        # Extract version from constants.py
-        CONSTANTS_VERSION=$(python -c "import sys; sys.path.insert(0, '.'); from mcp_kql_server.constants import __version__; print(__version__)")
+        # Extract version from constants.py using grep (no import needed)
+        CONSTANTS_VERSION=$(grep -E '^__version__\s*=' mcp_kql_server/constants.py | sed 's/.*=\s*["\'"'"']\([^"'"'"']*\)["\'"'"'].*/\1/')
         echo "constants.py version: $CONSTANTS_VERSION"
         
         # Check if all versions match
