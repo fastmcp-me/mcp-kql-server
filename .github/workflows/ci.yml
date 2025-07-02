@@ -29,23 +29,23 @@ jobs:
     - name: Install minimal dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install build twine
+        pip install build twine toml
     
     - name: Validate project structure
       run: |
         echo "Validating project structure"
-        test -f pyproject.toml && echo "✅ Found pyproject.toml"
-        test -f README.md && echo "✅ Found README.md"
-        test -d mcp_kql_server && echo "✅ Found mcp_kql_server directory"
-        test -f mcp_kql_server/__init__.py && echo "✅ Found package __init__.py"
-        echo "✅ All required files found"
+        test -f pyproject.toml && echo "Found pyproject.toml"
+        test -f README.md && echo "Found README.md"
+        test -d mcp_kql_server && echo "Found mcp_kql_server directory"
+        test -f mcp_kql_server/__init__.py && echo "Found package __init__.py"
+        echo "All required files found"
     
     - name: Validate version consistency
       run: |
-        echo "🔍 Checking version consistency"
+        echo "Checking version consistency"
         
-        # Extract version from pyproject.toml
-        PYPROJECT_VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+        # Extract version from pyproject.toml using toml library (Python 3.8 compatible)
+        PYPROJECT_VERSION=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
         echo "pyproject.toml version: $PYPROJECT_VERSION"
         
         # Extract version from __init__.py
@@ -58,9 +58,9 @@ jobs:
         
         # Check if all versions match
         if [ "$PYPROJECT_VERSION" = "$INIT_VERSION" ] && [ "$INIT_VERSION" = "$CONSTANTS_VERSION" ]; then
-          echo "✅ All versions are consistent: $PYPROJECT_VERSION"
+          echo "All versions are consistent: $PYPROJECT_VERSION"
         else
-          echo "❌ Version mismatch detected!"
+          echo "Version mismatch detected!"
           echo "pyproject.toml: $PYPROJECT_VERSION"
           echo "__init__.py: $INIT_VERSION"
           echo "constants.py: $CONSTANTS_VERSION"
@@ -72,24 +72,24 @@ jobs:
           TAG_VERSION=${GITHUB_REF#refs/tags/v}
           echo "Git tag version: $TAG_VERSION"
           if [ "$PYPROJECT_VERSION" = "$TAG_VERSION" ]; then
-            echo "✅ Tag version matches package version"
+            echo "Tag version matches package version"
           else
-            echo "❌ Tag version ($TAG_VERSION) does not match package version ($PYPROJECT_VERSION)"
+            echo "Tag version ($TAG_VERSION) does not match package version ($PYPROJECT_VERSION)"
             exit 1
           fi
         fi
     
     - name: Test package build
       run: |
-        echo "📦 Testing package build"
+        echo "Testing package build"
         python -m build
-        echo "✅ Package built successfully"
+        echo "Package built successfully"
         ls -la dist/
         
         # Validate built package
-        echo "🔍 Validating built package"
+        echo "Validating built package"
         twine check dist/*
-        echo "✅ Package validation passed"
+        echo "Package validation passed"
     
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -118,11 +118,11 @@ jobs:
     
     - name: Check code formatting
       run: |
-        echo "🎨 Checking code formatting"
-        black --check mcp_kql_server/ || echo "⚠️ Black formatting issues found (non-blocking)"
-        isort --check-only mcp_kql_server/ || echo "⚠️ Import sorting issues found (non-blocking)"
-        flake8 mcp_kql_server/ --max-line-length=100 || echo "⚠️ Linting issues found (non-blocking)"
-        echo "✅ Code quality checks completed"
+        echo "Checking code formatting"
+        black --check mcp_kql_server/ || echo "Black formatting issues found (non-blocking)"
+        isort --check-only mcp_kql_server/ || echo "Import sorting issues found (non-blocking)"
+        flake8 mcp_kql_server/ --max-line-length=100 || echo "Linting issues found (non-blocking)"
+        echo "Code quality checks completed"
 
   multi-platform-test:
     name: Platform Test
@@ -148,8 +148,8 @@ jobs:
         import sys
         import os
         
-        print('🐍 Python', sys.version)
-        print('💻 Platform: ${{ matrix.os }}')
+        print('Python', sys.version)
+        print('Platform: ${{ matrix.os }}')
         
         # Basic file existence check
         files_to_check = [
@@ -160,40 +160,17 @@ jobs:
         
         for file_path in files_to_check:
             if os.path.exists(file_path):
-                print('✅ Found:', file_path)
+                print('Found:', file_path)
             else:
-                print('❌ Missing:', file_path)
+                print('Missing:', file_path)
                 sys.exit(1)
         
-        print('✅ Basic compatibility test passed')
-
-  publish-test-pypi:
-    name: Publish to Test PyPI
-    runs-on: ubuntu-latest
-    needs: [basic-validation, code-quality, multi-platform-test]
-    if: startsWith(github.ref, 'refs/tags/v')
-    permissions:
-      id-token: write
-    
-    steps:
-    - name: Download build artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: python-package-distributions
-        path: dist/
-    
-    - name: Publish to Test PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/
-        password: ${{ secrets.PYPI_API_TOKEN }}
-        verbose: true
-        skip-existing: true
+        print('Basic compatibility test passed')
 
   publish-pypi:
     name: Publish to PyPI
     runs-on: ubuntu-latest
-    needs: [basic-validation, code-quality, multi-platform-test, publish-test-pypi]
+    needs: [basic-validation, code-quality, multi-platform-test]
     if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-')
     permissions:
       id-token: write
@@ -221,10 +198,10 @@ jobs:
     steps:
     - name: Print summary
       run: |
-        echo "🏁 CI/CD Pipeline Summary"
-        echo "========================"
+        echo "CI/CD Pipeline Summary"
+        echo "======================"
         echo ""
-        echo "📊 Job Results:"
+        echo "Job Results:"
         echo "  Basic Validation: ${{ needs.basic-validation.result }}"
         echo "  Code Quality: ${{ needs.code-quality.result }}"
         echo "  Multi-Platform Test: ${{ needs.multi-platform-test.result }}"
@@ -241,21 +218,19 @@ jobs:
           success_count=$((success_count + 1))
         fi
         
-        echo "📈 Success Rate: $success_count/3 core jobs passed"
+        echo "Success Rate: $success_count/3 core jobs passed"
         
         if [ $success_count -eq 3 ]; then
-          echo "🎉 All core pipeline stages passed!"
+          echo "All core pipeline stages passed!"
           
           # Check if this is a tag push for publishing
           if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
             echo ""
-            echo "🚀 Tag detected: ${GITHUB_REF#refs/tags/}"
-            echo "📦 PyPI publishing jobs will be triggered"
-            echo "   - Test PyPI: For validation"
-            echo "   - Production PyPI: For stable releases (non-prerelease tags)"
+            echo "Tag detected: ${GITHUB_REF#refs/tags/}"
+            echo "PyPI publishing job will be triggered"
           fi
         else
-          echo "⚠️ Some core jobs had issues but pipeline completed"
+          echo "Some core jobs had issues but pipeline completed"
         fi
 
   post-release-validation:
@@ -267,12 +242,12 @@ jobs:
     steps:
     - name: Wait for PyPI propagation
       run: |
-        echo "⏳ Waiting for PyPI propagation..."
+        echo "Waiting for PyPI propagation..."
         sleep 60
     
     - name: Validate PyPI package
       run: |
-        echo "🔍 Validating PyPI package availability"
+        echo "Validating PyPI package availability"
         
         # Extract version from tag
         TAG_VERSION=${GITHUB_REF#refs/tags/v}
@@ -282,15 +257,15 @@ jobs:
         
         # Try to install from PyPI
         pip install "$PACKAGE_NAME==$TAG_VERSION" || {
-          echo "⚠️ Package not yet available on PyPI (propagation delay expected)"
+          echo "Package not yet available on PyPI (propagation delay expected)"
           exit 0
         }
         
         # Verify installation
         python -c "
         import mcp_kql_server
-        print(f'✅ Successfully installed mcp-kql-server v{mcp_kql_server.__version__}')
-        print(f'📍 Package location: {mcp_kql_server.__file__}')
+        print(f'Successfully installed mcp-kql-server v{mcp_kql_server.__version__}')
+        print(f'Package location: {mcp_kql_server.__file__}')
         "
         
-        echo "🎉 PyPI package validation successful!"
+        echo "PyPI package validation successful!"
