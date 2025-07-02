@@ -71,6 +71,109 @@ pip install -e ".[dev]"
 python -c "from mcp_kql_server import __version__; print(f'MCP KQL Server v{__version__} installed successfully! 🎉')"
 ```
 
+## 📱 MCP Client Configuration
+
+### Claude Desktop
+
+Add to your Claude Desktop MCP settings file (`mcp_settings.json`):
+
+**Location:**
+- **Windows**: `%APPDATA%\Claude\mcp_settings.json`
+- **macOS**: `~/Library/Application Support/Claude/mcp_settings.json`
+- **Linux**: `~/.config/Claude/mcp_settings.json`
+
+```json
+{
+  "mcpServers": {
+    "mcp-kql-server": {
+      "command": "python",
+      "args": ["-m", "mcp_kql_server"],
+      "env": {}
+    }
+  }
+}
+```
+
+### VSCode (with MCP Extension)
+
+Add to your VSCode MCP configuration:
+
+**Settings.json location:**
+- **Windows**: `%APPDATA%\Code\User\settings.json`
+- **macOS**: `~/Library/Application Support/Code/User/settings.json`
+- **Linux**: `~/.config/Code/User/settings.json`
+
+```json
+{
+  "mcp.servers": {
+    "mcp-kql-server": {
+      "command": "python",
+      "args": ["-m", "mcp_kql_server"],
+      "cwd": null,
+      "env": {}
+    }
+  }
+}
+```
+
+### Roo-code (Cline Extension)
+
+Add to your Roo-code MCP settings:
+
+**MCP Settings location:**
+- **All platforms**: Through Roo-code extension settings or `mcp_settings.json`
+
+```json
+{
+  "mcpServers": {
+    "kql-server": {
+      "command": "python",
+      "args": ["-m", "mcp_kql_server"],
+      "env": {},
+      "description": "KQL Server for Azure Data Explorer queries with AI assistance"
+    }
+  }
+}
+```
+
+### Generic MCP Client
+
+For any MCP-compatible application:
+
+```bash
+# Command to run the server
+python -m mcp_kql_server
+
+# Server provides these tools:
+# - kql_execute: Execute KQL queries with AI context
+# - kql_schema_memory: Discover and cache cluster schemas
+```
+
+### Configuration with Environment Variables
+
+You can customize the server behavior with environment variables:
+
+```json
+{
+  "mcpServers": {
+    "mcp-kql-server": {
+      "command": "python",
+      "args": ["-m", "mcp_kql_server"],
+      "env": {
+        "KQL_DEBUG": "false",
+        "KQL_MEMORY_PATH": "C:\\Custom\\Memory\\Path",
+        "AZURE_CORE_ONLY_SHOW_ERRORS": "true"
+      }
+    }
+  }
+}
+```
+
+**Environment Variables:**
+- `KQL_DEBUG`: Enable debug logging (default: `false`)
+- `KQL_MEMORY_PATH`: Custom memory storage path (optional)
+- `AZURE_CORE_ONLY_SHOW_ERRORS`: Suppress Azure SDK verbose logs (default: `true`)
+
 ## 🔧 Quick Start
 
 ### 1. Authenticate with Azure (One-time setup)
@@ -82,7 +185,7 @@ az login
 ### 2. Start the MCP Server (Zero configuration)
 
 ```bash
-python -m mcp_kql_server.mcp_server
+python -m mcp_kql_server
 ```
 
 The server starts immediately with:
@@ -152,88 +255,35 @@ graph TD
 
 ## 💡 Usage Examples
 
-### Example 1: Basic KQL Query
+### Basic Query Execution
 
-```python
-# Execute a simple query with visualization
-{
-    "tool": "kql_execute",
-    "input": {
-        "query": "cluster('help.kusto.windows.net').database('Samples').StormEvents | take 10",
-        "visualize": true,
-        "use_schema_context": true
-    }
-}
-```
+Ask your MCP client (like Claude):
+> "Execute this KQL query against the help cluster: `cluster('help.kusto.windows.net').database('Samples').StormEvents | take 10` and show me the results in a table"
 
-**Response:**
-```json
-{
-    "status": "success",
-    "result": {
-        "columns": ["StartTime", "EndTime", "State", "EventType"],
-        "rows": [
-            ["2007-01-01T00:00:00Z", "2007-01-01T05:00:00Z", "FLORIDA", "Waterspout"],
-            ...
-        ],
-        "row_count": 10,
-        "visualization": "| StartTime | EndTime | State | EventType |\n|---|---|---|---|\n...",
-        "schema_context": ["Table: StormEvents - Weather event data...", ...]
-    }
-}
-```
+### Complex Analytics Query
 
-### Example 2: Complex Query with JSON Processing
+Ask your MCP client:
+> "Query the Samples database in the help cluster to show me the top 10 states by storm event count, include visualization"
 
-```python
-# Query with JSON extraction and filtering
-{
-    "tool": "kql_execute", 
-    "input": {
-        "query": """
-        cluster('mycluster.kusto.windows.net').database('mydb').Events
-        | where Timestamp >= ago(1d)
-        | extend Properties = parse_json(PropertiesJson)
-        | extend UserId = tostring(Properties.userId)
-        | where isnotempty(UserId)
-        | summarize Count=count() by UserId
-        | top 10 by Count desc
-        """,
-        "visualize": true
-    }
-}
-```
+### Schema Discovery
 
-### Example 3: Schema Discovery
+Ask your MCP client:
+> "Discover and cache the schema for the help.kusto.windows.net cluster, then tell me what databases and tables are available"
 
-```python
-# Discover and cache cluster schema
-{
-    "tool": "kql_schema_memory",
-    "input": {
-        "cluster_uri": "https://mycluster.kusto.windows.net",
-        "force_refresh": false
-    }
-}
-```
+### Data Exploration with Context
 
-**Response:**
-```json
-{
-    "status": "success",
-    "result": {
-        "cluster_uri": "https://mycluster.kusto.windows.net",
-        "database_count": 5,
-        "total_tables": 23,
-        "memory_file_path": "C:/Users/user/AppData/Roaming/KQL_MCP/schema_memory.json",
-        "discovery_summary": {
-            "databases": ["Events", "Logs", "Metrics"],
-            "tables_discovered": ["Events.UserActivity", "Logs.ApplicationLogs", ...],
-            "message": "Successfully discovered 23 tables across 5 databases"
-        }
-    }
-}
-```
+Ask your MCP client:
+> "Using the StormEvents table in the Samples database on help cluster, show me all tornado events from 2007 with damage estimates over $1M"
+
+### Time-based Analysis
+
+Ask your MCP client:
+> "Analyze storm events by month for the year 2007 in the StormEvents table, group by event type and show as a visualization"
+
+### Advanced Filtering
+
+Ask your MCP client:
+> "Find all severe weather events in Texas and Florida from the StormEvents table where property damage exceeded $100,000"
 
 ## 🎯 Key Benefits
 
@@ -394,7 +444,7 @@ Schema intelligence is automatically stored in:
 set KQL_DEBUG=true  # Windows
 export KQL_DEBUG=true  # macOS/Linux
 
-python -m mcp_kql_server.mcp_server
+python -m mcp_kql_server
 ```
 
 ## 🤝 Contributing

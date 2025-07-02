@@ -30,51 +30,29 @@ classifiers = [
     "Topic :: Database :: Database Engines/Servers",
 ]
 dependencies = [
+    # Core framework dependencies
     "pydantic>=2.0.0",
     "typing-extensions>=4.0.0",
     "tabulate>=0.9.0",
+    # MCP framework dependencies (essential)
+    "fastmcp>=0.4.0",
+    "mcp>=1.9.0",
+    # Azure dependencies for KQL/Kusto access (essential)
+    "azure-kusto-data>=4.0.0",
+    "azure-identity>=1.15.0",
+    "azure-core>=1.29.0",
+    # Networking and HTTP dependencies (essential)
+    "httpx>=0.25.0",
+    "requests>=2.31.0",
+    "tenacity>=8.0.0",
+    # CLI and utility dependencies (essential)
+    "click>=8.0.0",
+    "colorama>=0.4.6",
+    "python-dotenv>=1.0.0",
 ]
 
 [project.optional-dependencies]
-# Azure dependencies for KQL/Kusto access
-azure = [
-    "azure-kusto-data>=4.0.0",
-    "azure-identity>=1.15.0",
-    "azure-core>=1.29.0",
-]
-# MCP framework dependencies
-mcp = [
-    "fastmcp>=0.4.0",
-    "mcp>=1.9.0",
-]
-# Networking and HTTP dependencies
-networking = [
-    "httpx>=0.25.0",
-    "requests>=2.31.0",
-    "tenacity>=8.0.0",
-]
-# CLI and utility dependencies
-cli = [
-    "click>=8.0.0",
-    "colorama>=0.4.6",
-    "python-dotenv>=1.0.0",
-    "werkzeug>=2.0.0",
-]
-# Full production dependencies
-full = [
-    "azure-kusto-data>=4.0.0",
-    "azure-identity>=1.15.0",
-    "azure-core>=1.29.0",
-    "fastmcp>=0.4.0",
-    "mcp>=1.9.0",
-    "httpx>=0.25.0",
-    "requests>=2.31.0",
-    "tenacity>=8.0.0",
-    "click>=8.0.0",
-    "colorama>=0.4.6",
-    "python-dotenv>=1.0.0",
-    "werkzeug>=2.0.0",
-]
+# Development dependencies
 # Development dependencies
 dev = [
     "black>=23.0.0",
