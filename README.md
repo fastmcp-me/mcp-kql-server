@@ -7,7 +7,6 @@ A Model Context Protocol (MCP) server that provides intelligent KQL (Kusto Query
 <!-- Badges Section -->
 [![PyPI version](https://img.shields.io/pypi/v/mcp-kql-server.svg)](https://pypi.org/project/mcp-kql-server/)
 [![Python](https://img.shields.io/pypi/pyversions/mcp-kql-server.svg)](https://pypi.org/project/mcp-kql-server/)
-[![Downloads](https://img.shields.io/pypi/dm/mcp-kql-server.svg)](https://pypi.org/project/mcp-kql-server/)
 
 [![CI/CD Pipeline](https://github.com/4R9UN/mcp-kql-server/workflows/MCP%20KQL%20Server%20CI%2FCD%20Pipeline/badge.svg)](https://github.com/4R9UN/mcp-kql-server/actions)
 [![codecov](https://codecov.io/gh/4R9UN/mcp-kql-server/branch/main/graph/badge.svg)](https://codecov.io/gh/4R9UN/mcp-kql-server)
@@ -28,6 +27,60 @@ A Model Context Protocol (MCP) server that provides intelligent KQL (Kusto Query
 - **🔐 Azure Authentication**: Seamless Azure CLI integration
 - **🎨 Context-Aware**: AI-powered query assistance and error suggestions
 
+## 📊 MCP Tools Execution Flow
+
+### KQL Query Execution Flow
+
+```mermaid
+graph TD
+    A[👤 User Submits KQL Query] --> B{🔍 Query Validation}
+    B -->|❌ Invalid| C[📝 Syntax Error Response]
+    B -->|✅ Valid| D[🧠 Load Schema Context]
+    
+    D --> E{💾 Schema Cache Available?}
+    E -->|✅ Yes| F[⚡ Load from Memory]
+    E -->|❌ No| G[🔍 Discover Schema]
+    
+    F --> H[🎯 Execute Query]
+    G --> I[💾 Cache Schema + AI Context]
+    I --> H
+    
+    H --> J{🎯 Query Success?}
+    J -->|❌ Error| K[🚨 Enhanced Error Message]
+    J -->|✅ Success| L[📊 Process Results]
+    
+    L --> M[🎨 Generate Visualization]
+    M --> N[📤 Return Results + Context]
+    
+    K --> O[💡 AI Suggestions]
+    O --> N
+    
+    style A fill:#e1f5fe
+    style N fill:#e8f5e8
+    style K fill:#ffebee
+```
+
+### Schema Memory Discovery Flow
+
+```mermaid
+graph TD
+    A[👤 User Requests Schema Discovery] --> B[🔗 Connect to Cluster]
+    B --> C[📂 Enumerate Databases]
+    C --> D[📋 Discover Tables]
+    
+    D --> E[🔍 Get Table Schemas]
+    E --> F[🤖 AI Analysis]
+    F --> G[📝 Generate Descriptions]
+    
+    G --> H[💾 Store in Memory]
+    H --> I[📊 Update Statistics]
+    I --> J[✅ Return Summary]
+    
+    style A fill:#e1f5fe
+    style J fill:#e8f5e8
+```
+
+
 ## 📋 Prerequisites
 
 - Python 3.10 or higher
@@ -37,6 +90,13 @@ A Model Context Protocol (MCP) server that provides intelligent KQL (Kusto Query
 ## 🚀 One-Command Installation
 
 ### Quick Install (Recommended)
+
+#### From Source
+
+```bash
+git clone https://github.com/4R9UN/mcp-kql-server.git && cd mcp-kql-server && pip install -e .
+```
+### Alternative Installation Methods
 
 ```bash
 pip install mcp-kql-server
@@ -48,28 +108,6 @@ pip install mcp-kql-server
 - ✅ Suppresses verbose Azure SDK logs
 - ✅ No environment variables required
 
-### Alternative Installation Methods
-
-#### From Source
-```bash
-git clone https://github.com/4R9UN/mcp-kql-server.git
-cd mcp-kql-server
-pip install -e .
-```
-
-#### Development Setup
-```bash
-git clone https://github.com/4R9UN/mcp-kql-server.git
-cd mcp-kql-server
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -e ".[dev]"
-```
-
-#### Verify Installation
-```bash
-python -c "from mcp_kql_server import __version__; print(f'MCP KQL Server v{__version__} installed successfully! 🎉')"
-```
 
 ## 📱 MCP Client Configuration
 
@@ -160,20 +198,12 @@ You can customize the server behavior with environment variables:
       "command": "python",
       "args": ["-m", "mcp_kql_server"],
       "env": {
-        "KQL_DEBUG": "false",
-        "KQL_MEMORY_PATH": "C:\\Custom\\Memory\\Path",
-        "AZURE_CORE_ONLY_SHOW_ERRORS": "true"
+        
       }
     }
   }
 }
 ```
-
-**Environment Variables:**
-- `KQL_DEBUG`: Enable debug logging (default: `false`)
-- `KQL_MEMORY_PATH`: Custom memory storage path (optional)
-- `AZURE_CORE_ONLY_SHOW_ERRORS`: Suppress Azure SDK verbose logs (default: `true`)
-
 ## 🔧 Quick Start
 
 ### 1. Authenticate with Azure (One-time setup)
@@ -197,68 +227,16 @@ The server starts immediately with:
 
 The server provides two main tools:
 
-#### `kql_execute` - Execute KQL Queries with AI Context
-#### `kql_schema_memory` - Discover and Cache Cluster Schemas
+> #### `kql_execute` - Execute KQL Queries with AI Context
+> #### `kql_schema_memory` - Discover and Cache Cluster Schemas
 
-## 📊 Tool Execution Flow
-
-### KQL Query Execution Flow
-
-```mermaid
-graph TD
-    A[👤 User Submits KQL Query] --> B{🔍 Query Validation}
-    B -->|❌ Invalid| C[📝 Syntax Error Response]
-    B -->|✅ Valid| D[🧠 Load Schema Context]
-    
-    D --> E{💾 Schema Cache Available?}
-    E -->|✅ Yes| F[⚡ Load from Memory]
-    E -->|❌ No| G[🔍 Discover Schema]
-    
-    F --> H[🎯 Execute Query]
-    G --> I[💾 Cache Schema + AI Context]
-    I --> H
-    
-    H --> J{🎯 Query Success?}
-    J -->|❌ Error| K[🚨 Enhanced Error Message]
-    J -->|✅ Success| L[📊 Process Results]
-    
-    L --> M[🎨 Generate Visualization]
-    M --> N[📤 Return Results + Context]
-    
-    K --> O[💡 AI Suggestions]
-    O --> N
-    
-    style A fill:#e1f5fe
-    style N fill:#e8f5e8
-    style K fill:#ffebee
-```
-
-### Schema Memory Discovery Flow
-
-```mermaid
-graph TD
-    A[👤 User Requests Schema Discovery] --> B[🔗 Connect to Cluster]
-    B --> C[📂 Enumerate Databases]
-    C --> D[📋 Discover Tables]
-    
-    D --> E[🔍 Get Table Schemas]
-    E --> F[🤖 AI Analysis]
-    F --> G[📝 Generate Descriptions]
-    
-    G --> H[💾 Store in Memory]
-    H --> I[📊 Update Statistics]
-    I --> J[✅ Return Summary]
-    
-    style A fill:#e1f5fe
-    style J fill:#e8f5e8
-```
 
 ## 💡 Usage Examples
 
 ### Basic Query Execution
 
 Ask your MCP client (like Claude):
-> "Execute this KQL query against the help cluster: `cluster('help.kusto.windows.net').database('Samples').StormEvents | take 10` and show me the results in a table"
+> "Execute this KQL query against the help cluster: `cluster('help.kusto.windows.net').database('Samples').StormEvents | take 10` and summarize the result and give me high level insights "
 
 ### Complex Analytics Query
 
@@ -335,33 +313,6 @@ mcp-kql-server/
 └── README.md               # This file
 ```
 
-## ⚙️ Configuration
-
-### Zero-Configuration Setup
-
-The server works out-of-the-box with sensible defaults:
-
-- **Memory Path**: Automatically created at:
-  - **Windows**: `%APPDATA%\KQL_MCP\cluster_memory\`
-  - **macOS/Linux**: `~/.local/share/KQL_MCP/cluster_memory/`
-- **Authentication**: Uses your existing Azure CLI credentials
-- **Logging**: Optimized for production (minimal Azure SDK logs)
-- **Timeouts**: Connection (60s), Query (10min) - suitable for most workloads
-
-### Optional Environment Variables
-
-```bash
-# Optional: Enable debug mode (only if needed)
-export KQL_DEBUG=true
-```
-
-### Memory Management
-
-Schema intelligence is automatically stored in:
-- **Schema Memory**: `{memory_path}/schema_memory.json`
-- **Table Cache**: `{memory_path}/clusters/{cluster}/databases/{db}/tables/`
-- **Auto-cleanup**: Stale cache entries removed automatically
-
 ## 🚀 Advanced Usage
 
 ### Custom Memory Path
@@ -403,9 +354,8 @@ Schema intelligence is automatically stored in:
 
 ## 🔒 Security
 
-- **Azure CLI Authentication**: Leverages your existing Azure credentials
+- **Azure CLI Authentication**: Leverages your existing Azure device login
 - **No Credential Storage**: Server doesn't store authentication tokens
-- **Query Validation**: Built-in protection against malicious queries
 - **Local Memory**: Schema cache stored locally, not transmitted
 
 ## 🐛 Troubleshooting
@@ -449,17 +399,8 @@ python -m mcp_kql_server
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions! Please do. 
 
-### Development Setup
-
-```bash
-git clone https://github.com/4R9UN/mcp-kql-server.git
-cd mcp-kql-server
-python -m venv venv
-source venv/bin/activate
-pip install -e ".[dev]"
-```
 ## 🙏 Acknowledgments
 
 - [FastMCP](https://github.com/jlowin/fastmcp) - MCP server framework
@@ -474,6 +415,7 @@ pip install -e ".[dev]"
 - **Documentation**: [Full Documentation](https://github.com/4R9UN/mcp-kql-server/docs)
 - **PyPI Package**: [PyPI Project Page](https://pypi.org/project/mcp-kql-server/)
 - **Author**: [Arjun Trivedi](mailto:arjuntrivedi42@yahoo.com)
+- **Certified** : [MCPHub](https://mcphub.com/mcp-servers/4R9UN/mcp-kql-server)
 
 ## 🌟 Star History
 
