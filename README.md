@@ -258,10 +258,7 @@ Ask your MCP client:
 Ask your MCP client:
 > "Analyze storm events by month for the year 2007 in the StormEvents table, group by event type and show as a visualization"
 
-### Advanced Filtering
 
-Ask your MCP client:
-> "Find all severe weather events in Texas and Florida from the StormEvents table where property damage exceeded $100,000"
 
 ## 🎯 Key Benefits
 
