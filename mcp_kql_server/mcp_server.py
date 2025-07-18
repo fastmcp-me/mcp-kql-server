@@ -289,34 +289,33 @@ async def kql_schema_memory(input: SchemaMemoryInput) -> SchemaMemoryOutput:
 
 def main():
     """Main entry point for the MCP KQL Server."""
-    # Suppress all stdout and stderr to avoid FastMCP branding
-    original_stdout = sys.stdout
-    original_stderr = sys.stderr
+    print("Starting MCP KQL Server...", file=sys.stderr)
+    sys.stderr.flush()
     
-    # Redirect both stdout and stderr to devnull to suppress FastMCP branding
-    import io
-    sys.stdout = io.StringIO()
-    sys.stderr = io.StringIO()
+    # Check authentication before starting server
+    print("Checking Azure authentication...", file=sys.stderr)
+    sys.stderr.flush()
+    
+    auth_status = authenticate()
+    if not auth_status.get("authenticated"):
+        logger.error("Authentication failed: %s", auth_status.get("message"))
+        print("Authentication failed. Please run 'az login' and try again.", file=sys.stderr)
+        sys.stderr.flush()
+        sys.exit(1)
+    
+    print("Authentication successful. Starting server...", file=sys.stderr)
+    sys.stderr.flush()
     
     try:
-        # Initialize server with suppressed output
         server.run()
     except KeyboardInterrupt:
-        # Restore stderr for this message
-        sys.stderr = original_stderr
         print("\nServer stopped by user.", file=sys.stderr)
         sys.stderr.flush()
     except Exception as e:
-        # Restore stderr for error messages
-        sys.stderr = original_stderr
         logger.error(f"Server error: {e}")
         print(f"Server error: {e}", file=sys.stderr)
         sys.stderr.flush()
         sys.exit(1)
-    finally:
-        # Restore original streams
-        sys.stdout = original_stdout
-        sys.stderr = original_stderr
 
 # Run the server
 if __name__ == "__main__":
