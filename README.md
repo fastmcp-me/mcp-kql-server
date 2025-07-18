@@ -5,6 +5,7 @@
 A Model Context Protocol (MCP) server that provides intelligent KQL (Kusto Query Language) query execution with AI-powered schema caching and context assistance for Azure Data Explorer clusters.
 
 <!-- Badges Section -->
+[![Verified on MseeP](https://mseep.ai/badge.svg)](https://mseep.ai/app/18772353-3d90-4b12-a253-cf752efaadd2)
 [![PyPI version](https://img.shields.io/pypi/v/mcp-kql-server.svg)](https://pypi.org/project/mcp-kql-server/)
 [![Python](https://img.shields.io/pypi/pyversions/mcp-kql-server.svg)](https://pypi.org/project/mcp-kql-server/)
 
@@ -26,6 +27,7 @@ A Model Context Protocol (MCP) server that provides intelligent KQL (Kusto Query
 - **⚡ Performance Optimized**: Smart caching reduces cluster API calls
 - **🔐 Azure Authentication**: Seamless Azure CLI integration
 - **🎨 Context-Aware**: AI-powered query assistance and error suggestions
+- **🔕 Clean Output**: Suppressed FastMCP branding for professional experience (v2.0.2+)
 
 ## 📊 MCP Tools Execution Flow
 
@@ -383,16 +385,6 @@ mcp-kql-server/
 4. **Memory Path Issues**
    - Server automatically creates fallback directory in `~/.kql_mcp_memory` if default path fails
    - Check logs for memory path initialization messages
-
-### Debug Mode (Optional)
-
-```bash
-# Enable debug logging if needed
-set KQL_DEBUG=true  # Windows
-export KQL_DEBUG=true  # macOS/Linux
-
-python -m mcp_kql_server
-```
 
 ## 🤝 Contributing
 

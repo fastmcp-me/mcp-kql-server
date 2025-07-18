@@ -12,7 +12,7 @@ Email: arjuntrivedi42@yahoo.com
 from typing import Dict, List
 
 # Version information
-__version__ = "2.0.1"
+__version__ = "2.0.2"
 MCP_PROTOCOL_VERSION = "2024-11-05"
 
 # Server configuration

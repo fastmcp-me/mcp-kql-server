@@ -15,7 +15,7 @@ import logging
 from pathlib import Path
 
 # Version information
-__version__ = "2.0.1"
+__version__ = "2.0.2"
 __author__ = "Arjun Trivedi"
 __email__ = "arjuntrivedi42@yahoo.com"
 
@@ -63,7 +63,34 @@ def _suppress_azure_logs():
     except Exception:
         pass  # Ignore if loggers don't exist yet
 
+def _suppress_fastmcp_branding():
+    """Suppress FastMCP branding and verbose output."""
+    try:
+        # Set environment variables to suppress FastMCP branding
+        os.environ['FASTMCP_QUIET'] = 'true'
+        os.environ['FASTMCP_NO_BANNER'] = 'true'
+        os.environ['FASTMCP_SUPPRESS_BRANDING'] = 'true'
+        os.environ['FASTMCP_NO_LOGO'] = 'true'
+        os.environ['FASTMCP_SILENT'] = 'true'
+        os.environ['NO_COLOR'] = 'true'
+        os.environ['PYTHONIOENCODING'] = 'utf-8'
+        
+        # Suppress FastMCP and related loggers
+        fastmcp_loggers = [
+            'fastmcp',
+            'rich',
+            'rich.console',
+            'rich.progress'
+        ]
+        
+        for logger_name in fastmcp_loggers:
+            logging.getLogger(logger_name).setLevel(logging.ERROR)
+            
+    except Exception:
+        pass  # Ignore if loggers don't exist yet
+
 # Perform automatic setup on import
+_suppress_fastmcp_branding()
 _suppress_azure_logs()
 _setup_memory_directories()
 

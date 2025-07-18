@@ -8,9 +8,43 @@ Author: Arjun Trivedi
 Email: arjuntrivedi42@yahoo.com
 """
 
+import os
+import sys
+import logging
+from datetime import datetime
+from typing import List, Any, Union, Optional, Dict
+
+# Suppress all possible FastMCP branding output
+os.environ['FASTMCP_QUIET'] = 'true'
+os.environ['FASTMCP_NO_BANNER'] = 'true'
+os.environ['FASTMCP_SUPPRESS_BRANDING'] = 'true'
+os.environ['FASTMCP_NO_LOGO'] = 'true'
+os.environ['FASTMCP_SILENT'] = 'true'
+os.environ['NO_COLOR'] = 'true'
+os.environ['PYTHONIOENCODING'] = 'utf-8'
+
+# Configure logging to suppress FastMCP and Rich logs
+logging.getLogger('fastmcp').setLevel(logging.ERROR)
+logging.getLogger('rich').setLevel(logging.ERROR)
+logging.getLogger('rich.console').setLevel(logging.ERROR)
+
+# Monkey patch rich console to suppress output
+try:
+    from rich.console import Console
+    original_print = Console.print
+    def suppressed_print(self, *args, **kwargs):
+        # Only suppress if it contains FastMCP branding
+        if args and isinstance(args[0], str):
+            content = str(args[0])
+            if 'FastMCP' in content or 'gofastmcp.com' in content or 'fastmcp.cloud' in content:
+                return
+        return original_print(self, *args, **kwargs)
+    Console.print = suppressed_print
+except:
+    pass
+
 from fastmcp import FastMCP
 from pydantic import BaseModel
-from typing import List, Any, Union, Optional, Dict
 from .kql_auth import authenticate
 from .execute_kql import execute_kql_query
 from .schema_memory import (
@@ -22,9 +56,6 @@ from .schema_memory import (
 from .unified_memory import get_unified_memory
 from .constants import SERVER_NAME, __version__, ERROR_MESSAGES, SUCCESS_MESSAGES
 from .utils import format_error_message, is_debug_mode
-import logging
-import sys
-from datetime import datetime
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -258,33 +289,34 @@ async def kql_schema_memory(input: SchemaMemoryInput) -> SchemaMemoryOutput:
 
 def main():
     """Main entry point for the MCP KQL Server."""
-    print("Starting MCP KQL Server...", file=sys.stderr)
-    sys.stderr.flush()
+    # Suppress all stdout and stderr to avoid FastMCP branding
+    original_stdout = sys.stdout
+    original_stderr = sys.stderr
     
-    # Check authentication before starting server
-    print("Checking Azure authentication...", file=sys.stderr)
-    sys.stderr.flush()
-    
-    auth_status = authenticate()
-    if not auth_status.get("authenticated"):
-        logger.error("Authentication failed: %s", auth_status.get("message"))
-        print("Authentication failed. Please run 'az login' and try again.", file=sys.stderr)
-        sys.stderr.flush()
-        sys.exit(1)
-    
-    print("Authentication successful. Starting server...", file=sys.stderr)
-    sys.stderr.flush()
+    # Redirect both stdout and stderr to devnull to suppress FastMCP branding
+    import io
+    sys.stdout = io.StringIO()
+    sys.stderr = io.StringIO()
     
     try:
+        # Initialize server with suppressed output
         server.run()
     except KeyboardInterrupt:
+        # Restore stderr for this message
+        sys.stderr = original_stderr
         print("\nServer stopped by user.", file=sys.stderr)
         sys.stderr.flush()
     except Exception as e:
+        # Restore stderr for error messages
+        sys.stderr = original_stderr
         logger.error(f"Server error: {e}")
         print(f"Server error: {e}", file=sys.stderr)
         sys.stderr.flush()
         sys.exit(1)
+    finally:
+        # Restore original streams
+        sys.stdout = original_stdout
+        sys.stderr = original_stderr
 
 # Run the server
 if __name__ == "__main__":

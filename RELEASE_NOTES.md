@@ -1,9 +1,71 @@
-# Release Notes - MCP KQL Server v2.0.0
+# Release Notes - MCP KQL Server
+
+---
+
+## 🔕 **v2.0.2 - FastMCP Branding Suppression**
+
+> **Patch Release** 🛠️
+
+**Release Date**: July 18, 2025
+**Author**: Arjun Trivedi
+**Repository**: https://github.com/4R9UN/mcp-kql-server
+
+### 🚀 **What's New in v2.0.2**
+
+#### **Professional Output Experience**
+- **🔕 Suppressed FastMCP Branding**: Removed FastMCP framework branding output for cleaner, professional server startup
+- **🎯 Clean Console Output**: Server now starts without displaying FastMCP version, documentation links, or deployment information
+- **⚡ Streamlined Experience**: Focus on functionality without framework marketing messages
+
+#### **Development Optimizations**
+- **🧹 Removed Development Dependencies**: Cleaned up dev-only files (requirements-dev.txt, Makefile, .pre-commit-config.yaml, pytest.ini)
+- **📦 Simplified Project Structure**: Reduced unnecessary files for production deployment
+- **🔧 Production-Ready Configuration**: Optimized for production environments
+
+### 🔧 **Technical Changes**
+
+#### **FastMCP Branding Suppression**
+- Added comprehensive environment variable configuration to suppress FastMCP output
+- Implemented Rich console monkey patching to filter branding messages
+- Enhanced logging configuration to suppress verbose FastMCP logs
+- Redirected stdout during server startup to prevent branding display
+
+#### **Configuration Updates**
+- Set `FASTMCP_QUIET`, `FASTMCP_NO_BANNER`, `FASTMCP_SUPPRESS_BRANDING` environment variables
+- Added `NO_COLOR` support for consistent output across environments
+- Enhanced logging level management for FastMCP and Rich libraries
+
+### 🐛 **Bug Fixes**
+- **Fixed Server Startup Output**: Eliminated unwanted FastMCP branding messages during server initialization
+- **Improved Error Handling**: Better error management for StringIO redirection issues
+- **Enhanced Logging**: More appropriate logging levels for production environments
+
+### 📦 **Installation & Upgrade**
+
+#### **New Installation**
+```bash
+pip install mcp-kql-server==2.0.2
+```
+
+#### **Upgrade from Previous Versions**
+```bash
+pip install --upgrade mcp-kql-server
+```
+
+### 🎯 **Benefits**
+- **Professional Experience**: Clean server startup without framework branding
+- **Corporate Friendly**: Suitable for enterprise environments requiring clean output
+- **Focused Functionality**: Emphasis on KQL capabilities rather than framework marketing
+- **Reduced Clutter**: Cleaner console output for better user experience
+
+---
+
+## 🚀 **v2.0.0 - Major Release**
 
 > **Major Release** 🎉
 
-**Release Date**: July 1, 2025  
-**Author**: Arjun Trivedi  
+**Release Date**: July 1, 2025
+**Author**: Arjun Trivedi
 **Repository**: https://github.com/4R9UN/mcp-kql-server
 
 ---
