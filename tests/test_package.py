@@ -11,7 +11,7 @@ def test_package_imports():
         import mcp_kql_server
         assert hasattr(mcp_kql_server, '__version__')
         assert hasattr(mcp_kql_server, '__author__')
-        assert mcp_kql_server.__version__ == "2.0.0"
+        assert mcp_kql_server.__version__ == "2.0.3"
         assert mcp_kql_server.__author__ == "Arjun Trivedi"
     except ImportError:
         # Skip test if package not available in CI
@@ -24,7 +24,7 @@ def test_version_consistency():
         from mcp_kql_server import __version__ as pkg_version
         from mcp_kql_server.constants import __version__ as const_version
         
-        assert pkg_version == const_version == "2.0.0"
+        assert pkg_version == const_version == "2.0.3"
     except ImportError:
         # Skip test if modules not available in CI
         pass

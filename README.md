@@ -58,9 +58,21 @@ graph TD
     K --> O[💡 AI Suggestions]
     O --> N
     
-    style A fill:#e1f5fe
-    style N fill:#e8f5e8
-    style K fill:#ffebee
+    style A fill:#4a90e2,stroke:#2c5282,stroke-width:2px,color:#ffffff
+    style B fill:#7c7c7c,stroke:#4a4a4a,stroke-width:2px,color:#ffffff
+    style C fill:#e74c3c,stroke:#c0392b,stroke-width:2px,color:#ffffff
+    style D fill:#8e44ad,stroke:#6a1b99,stroke-width:2px,color:#ffffff
+    style E fill:#7c7c7c,stroke:#4a4a4a,stroke-width:2px,color:#ffffff
+    style F fill:#27ae60,stroke:#1e8449,stroke-width:2px,color:#ffffff
+    style G fill:#f39c12,stroke:#d68910,stroke-width:2px,color:#ffffff
+    style H fill:#2980b9,stroke:#1f618d,stroke-width:2px,color:#ffffff
+    style I fill:#f39c12,stroke:#d68910,stroke-width:2px,color:#ffffff
+    style J fill:#7c7c7c,stroke:#4a4a4a,stroke-width:2px,color:#ffffff
+    style K fill:#e74c3c,stroke:#c0392b,stroke-width:2px,color:#ffffff
+    style L fill:#27ae60,stroke:#1e8449,stroke-width:2px,color:#ffffff
+    style M fill:#8e44ad,stroke:#6a1b99,stroke-width:2px,color:#ffffff
+    style N fill:#27ae60,stroke:#1e8449,stroke-width:2px,color:#ffffff
+    style O fill:#f39c12,stroke:#d68910,stroke-width:2px,color:#ffffff
 ```
 
 ### Schema Memory Discovery Flow
@@ -79,8 +91,16 @@ graph TD
     H --> I[📊 Update Statistics]
     I --> J[✅ Return Summary]
     
-    style A fill:#e1f5fe
-    style J fill:#e8f5e8
+    style A fill:#4a90e2,stroke:#2c5282,stroke-width:2px,color:#ffffff
+    style B fill:#8e44ad,stroke:#6a1b99,stroke-width:2px,color:#ffffff
+    style C fill:#f39c12,stroke:#d68910,stroke-width:2px,color:#ffffff
+    style D fill:#2980b9,stroke:#1f618d,stroke-width:2px,color:#ffffff
+    style E fill:#7c7c7c,stroke:#4a4a4a,stroke-width:2px,color:#ffffff
+    style F fill:#e67e22,stroke:#bf6516,stroke-width:2px,color:#ffffff
+    style G fill:#8e44ad,stroke:#6a1b99,stroke-width:2px,color:#ffffff
+    style H fill:#f39c12,stroke:#d68910,stroke-width:2px,color:#ffffff
+    style I fill:#2980b9,stroke:#1f618d,stroke-width:2px,color:#ffffff
+    style J fill:#27ae60,stroke:#1e8449,stroke-width:2px,color:#ffffff
 ```
 
 
@@ -288,10 +308,10 @@ graph TD
     B <--> C[Azure Data Explorer<br/>Kusto Clusters]
     B <--> D[Schema Memory<br/>Local AI Cache]
     
-    style A fill:#e1f5fe
-    style B fill:#f3e5f5
-    style C fill:#fff3e0
-    style D fill:#e8f5e8
+    style A fill:#4a90e2,stroke:#2c5282,stroke-width:3px,color:#ffffff
+    style B fill:#8e44ad,stroke:#6a1b99,stroke-width:3px,color:#ffffff
+    style C fill:#e67e22,stroke:#bf6516,stroke-width:3px,color:#ffffff
+    style D fill:#27ae60,stroke:#1e8449,stroke-width:3px,color:#ffffff
 ```
 
 ## 📁 Project Structure
@@ -391,18 +411,9 @@ mcp-kql-server/
 
 We welcome contributions! Please do. 
 
-## 🙏 Acknowledgments
-
-- [FastMCP](https://github.com/jlowin/fastmcp) - MCP server framework
-- [Azure Kusto Python SDK](https://github.com/Azure/azure-kusto-python) - KQL client library
-- [Model Context Protocol](https://github.com/anthropics/mcp) - Protocol specification
-- [Microsoft Azure Data Explorer](https://azure.microsoft.com/en-us/services/data-explorer/) - Cloud analytics service
-
 ## 📞 Support
 
 - **Issues**: [GitHub Issues](https://github.com/4R9UN/mcp-kql-server/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/4R9UN/mcp-kql-server/discussions)
-- **Documentation**: [Full Documentation](https://github.com/4R9UN/mcp-kql-server/docs)
 - **PyPI Package**: [PyPI Project Page](https://pypi.org/project/mcp-kql-server/)
 - **Author**: [Arjun Trivedi](mailto:arjuntrivedi42@yahoo.com)
 - **Certified** : [MCPHub](https://mcphub.com/mcp-servers/4R9UN/mcp-kql-server)

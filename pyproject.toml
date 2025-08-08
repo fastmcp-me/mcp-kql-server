@@ -1,6 +1,6 @@
 [project]
 name = "mcp-kql-server"
-version = "2.0.2"
+version = "2.0.3"
 description = "AI-Powered MCP server for KQL query execution with intelligent schema memory and context assistance"
 authors = [{ name = "Arjun Trivedi", email = "arjuntrivedi42@yahoo.com" }]
 readme = "README.md"
@@ -29,24 +29,22 @@ classifiers = [
 ]
 dependencies = [
     # Core framework dependencies
-    "pydantic>=2.0.0",
-    "typing-extensions>=4.0.0",
-    "tabulate>=0.9.0",
+    "pydantic>=2.0.0,<3.0.0",
+    "typing-extensions>=4.0.0,<5.0.0",
+    "tabulate>=0.9.0,<1.0.0",
     # MCP framework dependencies (essential)
-    "fastmcp>=2.0.0",
-    "mcp>=1.9.0",
+    "fastmcp>=2.0.0,<3.0.0",
     # Azure dependencies for KQL/Kusto access (essential)
-    "azure-kusto-data>=4.0.0",
-    "azure-identity>=1.15.0",
-    "azure-core>=1.29.0",
+    "azure-kusto-data>=4.0.0,<5.0.0",
+    "azure-identity>=1.15.0,<2.0.0",
     # Networking and HTTP dependencies (essential)
-    "httpx>=0.25.0",
-    "requests>=2.31.0",
-    "tenacity>=8.0.0",
+    "httpx>=0.25.0,<1.0.0",
+    "requests>=2.31.0,<3.0.0",
+    "tenacity>=8.0.0,<10.0.0",
     # CLI and utility dependencies (essential)
-    "click>=8.0.0",
-    "colorama>=0.4.6",
-    "python-dotenv>=1.0.0",
+    "click>=8.0.0,<9.0.0",
+    "colorama>=0.4.6,<1.0.0",
+    "python-dotenv>=1.0.0,<2.0.0",
 ]
 
 # No optional dependencies needed for production
