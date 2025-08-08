@@ -49,9 +49,7 @@ def test_module_structure():
         'mcp_kql_server.utils',
         'mcp_kql_server.execute_kql',
         'mcp_kql_server.kql_auth',
-        'mcp_kql_server.mcp_server',
-        'mcp_kql_server.schema_memory',
-        'mcp_kql_server.unified_memory'
+        'mcp_kql_server.mcp_server'
     ]
     
     for module_name in expected_modules:

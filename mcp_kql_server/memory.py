@@ -2,7 +2,6 @@
 Unified Schema Memory System for MCP KQL Server
 
 This module provides a unified schema memory system that:
-- Stores schema at %APPDATA%/KQL_MCP/schema_memory.json
 - Uses AI-friendly special tokens (@@CLUSTER@@, ##DATABASE##, ##TABLE##, ::COLUMN::, %%DESC%%)
 - Includes ALL columns with summaries (no artificial limits)
 - Supports cross-cluster table sharing
@@ -54,14 +53,13 @@ class UnifiedSchemaMemory:
     def _get_memory_path(self, custom_path: Optional[str] = None) -> Path:
         """Get the path for unified schema memory."""
         if custom_path:
-            return Path(custom_path) / "schema_memory.json"
-        
-        if os.name == 'nt':  # Windows
-            base_path = Path(os.environ.get('APPDATA', ''))
+            base_dir = Path(custom_path)
+        elif os.name == 'nt':  # Windows
+            base_dir = Path(os.environ.get('APPDATA', '')) / 'KQL_MCP'
         else:  # macOS/Linux
-            base_path = Path.home() / '.local' / 'share'
+            base_dir = Path.home() / '.local' / 'share' / 'KQL_MCP'
         
-        return base_path / 'KQL_MCP' / 'schema_memory.json'
+        return base_dir / 'unified_memory.json'
     
     def load_memory(self) -> Dict[str, Any]:
         """Load schema memory from disk with caching."""
@@ -168,7 +166,41 @@ class UnifiedSchemaMemory:
         
         logger.info(f"Table {database}.{table} not in memory, discovering schema...")
         return self.discover_and_save_table_schema(cluster_uri, database, table)
-    
+
+    def discover_and_save_cluster_schema(self, cluster_uri: str, force_refresh: bool = False) -> Tuple[bool, int, int]:
+        """Discover and save schema for all tables in all databases of a cluster."""
+        normalized_cluster = self._normalize_cluster_uri(cluster_uri)
+        discovered_tables = 0
+        discovered_databases = 0
+
+        try:
+            kcsb = KustoConnectionStringBuilder.with_az_cli_authentication(normalized_cluster)
+            client = KustoClient(kcsb)
+
+            try:
+                # Get all databases
+                databases_response = client.execute_mgmt("", ".show databases")
+                databases = [row['DatabaseName'] for row in databases_response.primary_results[0]]
+                discovered_databases = len(databases)
+
+                for db in databases:
+                    # Get all tables in the database
+                    tables_response = client.execute_mgmt(db, ".show tables")
+                    tables = [row['TableName'] for row in tables_response.primary_results[0]]
+                    
+                    for table in tables:
+                        if self.discover_and_save_table_schema(cluster_uri, db, table):
+                            discovered_tables += 1
+                
+                return True, discovered_databases, discovered_tables
+
+            finally:
+                client.close()
+        
+        except Exception as e:
+            logger.error(f"Failed to discover schema for cluster {cluster_uri}: {e}")
+            return False, 0, 0
+
     def discover_and_save_table_schema(self, cluster_uri: str, database: str, table: str) -> bool:
         """Discover schema for a table and save with AI-optimized tokens."""
         normalized_cluster = self._normalize_cluster_uri(cluster_uri)
@@ -178,8 +210,8 @@ class UnifiedSchemaMemory:
             client = KustoClient(kcsb)
             
             try:
-                # Get table schema
-                schema_query = f".show table {table} cslschema"
+                # Get table schema, ensuring table name is escaped
+                schema_query = f".show table ['{table}'] cslschema"
                 schema_response = client.execute_mgmt(database, schema_query)
                 
                 columns = []
@@ -517,3 +549,63 @@ def get_table_ai_token(cluster_uri: str, database: str, table: str) -> Optional[
     """Get AI token for a table."""
     memory = get_unified_memory()
     return memory.get_table_ai_token(cluster_uri, database, table)
+
+def update_memory_after_query(cluster_uri: str, database: str, tables: List[str], memory_path: Optional[str] = None):
+    """After query execution, ensure all referenced tables are in memory."""
+    memory = get_unified_memory(memory_path)
+    
+    for table in tables:
+        try:
+            memory.ensure_table_in_memory(cluster_uri, database, table)
+        except Exception as e:
+            logger.warning(f"Failed to update memory for {database}.{table}: {e}")
+
+def get_context_for_tables(cluster_uri: str, database: str, tables: List[str], memory_path: Optional[str] = None) -> List[str]:
+    """Load AI context tokens for relevant tables using unified memory system."""
+    
+    # Use the unified memory system for optimized context loading
+    memory = get_unified_memory(memory_path)
+    context_tokens = []
+    
+    # Ensure all tables are in memory and get their tokens
+    for table in tables:
+        try:
+            if memory.ensure_table_in_memory(cluster_uri, database, table):
+                token = memory.get_table_ai_token(cluster_uri, database, table)
+                if token:
+                    context_tokens.append(token)
+                else:
+                    # Fallback token with special markers
+                    fallback_token = f"{SPECIAL_TOKENS['TABLE']}{table}|{SPECIAL_TOKENS['DESCRIPTION']}discovery_needed"
+                    context_tokens.append(fallback_token)
+            else:
+                # Discovery failed, add placeholder
+                fallback_token = f"{SPECIAL_TOKENS['TABLE']}{table}|{SPECIAL_TOKENS['DESCRIPTION']}discovery_failed"
+                context_tokens.append(fallback_token)
+        except Exception as e:
+            logger.warning(f"Failed to get context for {database}.{table}: {e}")
+            fallback_token = f"{SPECIAL_TOKENS['TABLE']}{table}|{SPECIAL_TOKENS['DESCRIPTION']}error_occurred"
+            context_tokens.append(fallback_token)
+    
+    # Apply context size management
+    total_size = sum(len(token) for token in context_tokens)
+    if total_size > 4000:  # Apply size limit
+        logger.warning(f"Context size {total_size} exceeds limit, applying compression")
+        compressed_tokens = []
+        remaining_size = 4000
+        
+        for token in context_tokens:
+            if len(token) <= remaining_size:
+                compressed_tokens.append(token)
+                remaining_size -= len(token)
+            else:
+                # Try to compress the token
+                compressed = memory._compress_token(token, remaining_size)
+                if compressed:
+                    compressed_tokens.append(compressed)
+                break
+        
+        context_tokens = compressed_tokens
+    
+    logger.info(f"Loaded {len(context_tokens)} context tokens for tables: {tables}")
+    return context_tokens

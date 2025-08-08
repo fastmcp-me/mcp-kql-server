@@ -57,8 +57,8 @@ class TestExecuteKQL(unittest.TestCase):
 
     @patch('mcp_kql_server.execute_kql.KustoClient')
     @patch('mcp_kql_server.execute_kql.KustoConnectionStringBuilder')
-    @patch('mcp_kql_server.execute_kql.SchemaMemoryManager')
-    def test_execute_kql_query_success(self, mock_schema_manager, mock_connection_builder, mock_kusto_client):
+    @patch('mcp_kql_server.execute_kql.get_unified_memory')
+    def test_execute_kql_query_success(self, mock_get_memory, mock_connection_builder, mock_kusto_client):
         """Test successful KQL query execution."""
         # Mock Kusto client
         mock_client_instance = MagicMock()
@@ -78,8 +78,8 @@ class TestExecuteKQL(unittest.TestCase):
         
         # Mock schema manager
         mock_schema_instance = MagicMock()
-        mock_schema_manager.return_value = mock_schema_instance
-        mock_schema_instance.get_schema_context_for_query.return_value = {}
+        mock_get_memory.return_value = mock_schema_instance
+        mock_schema_instance.load_query_relevant_context.return_value = []
         
         # Execute query
         result = execute_kql_query(self.valid_query, visualize=False, use_schema_context=False)
@@ -92,8 +92,8 @@ class TestExecuteKQL(unittest.TestCase):
 
     @patch('mcp_kql_server.execute_kql.KustoClient')
     @patch('mcp_kql_server.execute_kql.KustoConnectionStringBuilder')
-    @patch('mcp_kql_server.execute_kql.SchemaMemoryManager')
-    def test_execute_kql_query_with_visualization(self, mock_schema_manager, mock_connection_builder, mock_kusto_client):
+    @patch('mcp_kql_server.execute_kql.get_unified_memory')
+    def test_execute_kql_query_with_visualization(self, mock_get_memory, mock_connection_builder, mock_kusto_client):
         """Test KQL query execution with visualization."""
         # Mock Kusto client
         mock_client_instance = MagicMock()
@@ -113,8 +113,8 @@ class TestExecuteKQL(unittest.TestCase):
         
         # Mock schema manager
         mock_schema_instance = MagicMock()
-        mock_schema_manager.return_value = mock_schema_instance
-        mock_schema_instance.get_schema_context_for_query.return_value = {}
+        mock_get_memory.return_value = mock_schema_instance
+        mock_schema_instance.load_query_relevant_context.return_value = []
         
         # Execute query with visualization
         result = execute_kql_query(self.valid_query, visualize=True, use_schema_context=False)
@@ -142,8 +142,8 @@ class TestExecuteKQL(unittest.TestCase):
 
     @patch('mcp_kql_server.execute_kql.KustoClient')
     @patch('mcp_kql_server.execute_kql.KustoConnectionStringBuilder')
-    @patch('mcp_kql_server.execute_kql.SchemaMemoryManager')
-    def test_execute_kql_query_with_schema_context(self, mock_schema_manager, mock_connection_builder, mock_kusto_client):
+    @patch('mcp_kql_server.execute_kql.get_unified_memory')
+    def test_execute_kql_query_with_schema_context(self, mock_get_memory, mock_connection_builder, mock_kusto_client):
         """Test KQL query execution with schema context."""
         # Mock Kusto client
         mock_client_instance = MagicMock()
@@ -163,25 +163,22 @@ class TestExecuteKQL(unittest.TestCase):
         
         # Mock schema manager with context
         mock_schema_instance = MagicMock()
-        mock_schema_manager.return_value = mock_schema_instance
-        mock_schema_instance.get_schema_context_for_query.return_value = {
-            "relevant_tables": {"TestDB.TestTable": {"description": "Test table"}},
-            "schema_timestamp": "2025-01-26T12:00:00Z"
-        }
+        mock_get_memory.return_value = mock_schema_instance
+        mock_schema_instance.load_query_relevant_context.return_value = ["@@CLUSTER@@test-cluster##DATABASE##TestDatabase##TABLE##TestTable**SUMMARY**data_table_1_cols::COLUMN::TestColumn>>TYPE<<string%%DESC%%string_field"]
         
         # Execute query with schema context
         result = execute_kql_query(self.valid_query, visualize=True, use_schema_context=True)
         
         # Verify schema context was loaded
-        mock_schema_instance.get_schema_context_for_query.assert_called_once()
+        mock_get_memory.return_value.load_query_relevant_context.assert_called_once()
         
         # Verify results
         self.assertIsInstance(result, list)
 
     @patch('mcp_kql_server.execute_kql.KustoClient')
     @patch('mcp_kql_server.execute_kql.KustoConnectionStringBuilder')
-    @patch('mcp_kql_server.execute_kql.SchemaMemoryManager')
-    def test_execute_kql_query_empty_results(self, mock_schema_manager, mock_connection_builder, mock_kusto_client):
+    @patch('mcp_kql_server.execute_kql.get_unified_memory')
+    def test_execute_kql_query_empty_results(self, mock_get_memory, mock_connection_builder, mock_kusto_client):
         """Test KQL query execution with empty results."""
         # Mock Kusto client
         mock_client_instance = MagicMock()
@@ -194,8 +191,8 @@ class TestExecuteKQL(unittest.TestCase):
         
         # Mock schema manager
         mock_schema_instance = MagicMock()
-        mock_schema_manager.return_value = mock_schema_instance
-        mock_schema_instance.get_schema_context_for_query.return_value = {}
+        mock_get_memory.return_value = mock_schema_instance
+        mock_schema_instance.load_query_relevant_context.return_value = []
         
         # Execute query
         result = execute_kql_query(self.valid_query, use_schema_context=False)

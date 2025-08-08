@@ -12,7 +12,7 @@ import os
 import re
 import logging
 from pathlib import Path
-from typing import Optional, Dict, Any, Tuple
+from typing import Optional, Dict, Any, Tuple, List
 from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
@@ -38,13 +38,12 @@ def get_default_cluster_memory_path() -> Path:
     else:  # macOS/Linux
         base_path = Path.home() / '.local' / 'share'
     
-    # Create the full path
+    # Create the full path and ensure it exists
     memory_path = base_path / 'KQL_MCP' / 'cluster_memory'
-    
-    # Automatically create the directory if it doesn't exist
     try:
         memory_path.mkdir(parents=True, exist_ok=True)
         logger.info(f"Initialized KQL memory path: {memory_path}")
+        return memory_path
     except Exception as e:
         logger.warning(f"Could not create memory directory {memory_path}: {e}")
         # Use a temporary fallback in user's home directory
@@ -52,8 +51,6 @@ def get_default_cluster_memory_path() -> Path:
         fallback_path.mkdir(parents=True, exist_ok=True)
         logger.info(f"Using fallback memory path: {fallback_path}")
         return fallback_path
-    
-    return memory_path
 
 
 def normalize_cluster_uri(cluster_input: str) -> str:
@@ -131,15 +128,13 @@ def clean_query_for_execution(query: str) -> str:
     Returns:
         Cleaned query ready for execution
     """
-    # Remove cluster('...').database('...').
-    cleaned = re.sub(
+    # Remove cluster('...').database('...'). and return
+    return re.sub(
         r"cluster\('([^']+)'\)\.database\('([^']+)'\)\.",
         "",
         query,
         count=1
-    )
-    
-    return cleaned.strip()
+    ).strip()
 
 
 def format_error_message(error: Exception, context: str = "") -> str:
@@ -153,12 +148,9 @@ def format_error_message(error: Exception, context: str = "") -> str:
         Formatted error message suitable for user display
     """
     error_type = type(error).__name__
-    error_msg = str(error)
-    
     if context:
-        return f"{context}: {error_type} - {error_msg}"
-    else:
-        return f"{error_type}: {error_msg}"
+        return f"{context}: {error_type} - {str(error)}"
+    return f"{error_type}: {str(error)}"
 
 
 def validate_kql_query_syntax(query: str) -> Tuple[bool, Optional[str]]:
@@ -190,11 +182,11 @@ def validate_kql_query_syntax(query: str) -> Tuple[bool, Optional[str]]:
         return False, "Query contains no executable KQL after cluster/database specification"
     
     # Check for suspicious characters that might indicate injection
-    # Temporarily disabled to allow complex KQL queries with regex patterns
     suspicious_patterns = [
-        # r'[\x00-\x08\x0b-\x0c\x0e-\x1f]',  # Control characters (but allow \t, \n, \r)
-        # r'--\s*$',        # SQL-style comments at end
-        # r'/\*.*\*/',      # Block comments
+        r';',              # Semicolon, potential for multiple statements
+        r'--',             # SQL-style comments
+        r'/\*', r'\*/',    # Block comments
+        r'drop', r'delete', r'insert', r'update', r'alter' # DML/DDL commands
     ]
     
     for pattern in suspicious_patterns:
@@ -366,3 +358,40 @@ def get_file_age_days(filepath: Path) -> Optional[float]:
     except Exception as e:
         logger.warning(f"Failed to get file age for {filepath}: {str(e)}")
         return None
+
+def extract_tables_from_query(query: str) -> List[str]:
+    """Extract table names from a KQL query with improved reliability."""
+    
+    # This pattern looks for a table name that follows database('...')
+    # It handles an optional dot and whitespace.
+    # It also captures table names that are keywords by using ['table'] syntax.
+    pattern = r"""
+        database\s*\(\s*'[^\']+'\s*\)\s*\.?\s* # Matches database('...') with optional dot
+        (
+            \['([^\]]+)'\] | # Matches ['table_name']
+            ([A-Za-z_][A-Za-z0-9_]*)  # Matches table_name
+        )
+    """
+    
+    matches = re.findall(pattern, query, re.VERBOSE)
+    
+    # The regex captures multiple groups, so we need to extract the correct one
+    tables = [m[1] or m[2] for m in matches]
+    
+    # Fallback for queries where the table is not directly after database()
+    # e.g., "let db = '...'; cluster('...').database(db).TableName"
+    # This is a simplified fallback and might not cover all edge cases.
+    if not tables:
+        # Look for a word followed by a pipe, but be more careful than before.
+        # This should be the first such word after the database() call.
+        db_match = re.search(r"database\('([^']+)'\)", query)
+        if db_match:
+            query_after_db = query[db_match.end():]
+            # Find the first valid table name
+            fallback_match = re.search(r"^\s*\.?\s*([A-Za-z_][A-Za-z0-9_]*)", query_after_db)
+            if fallback_match:
+                tables.append(fallback_match.group(1))
+
+    unique_tables = list(set(tables))
+    logger.debug(f"Extracted tables from query: {unique_tables}")
+    return unique_tables

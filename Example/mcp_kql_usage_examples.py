@@ -142,61 +142,6 @@ def example_security_analysis() -> Dict[str, Any]:
 
 
 # ============================================================================
-# EXAMPLE 4: Schema Discovery and Management
-# ============================================================================
-
-def example_schema_discovery() -> Dict[str, Any]:
-    """Discover and cache schema information for a cluster."""
-    
-    request = {
-        "tool": "kql_schema_memory",
-        "input": {
-            "cluster_uri": "https://help.kusto.windows.net",
-            "force_refresh": False
-        }
-    }
-    
-    expected_response = {
-        "status": "success",
-        "result": {
-            "cluster_uri": "https://help.kusto.windows.net",
-            "database_count": 3,
-            "total_tables": 15,
-            "memory_file_path": "C:/Users/user/AppData/Roaming/KQL_MCP/schema_memory.json",
-            "timestamp": "2025-01-07T12:00:00",
-            "discovery_summary": {
-                "action": "discovered_unified_memory",
-                "databases": ["Samples", "ContosoSales", "Github"],
-                "tables_discovered": [
-                    "Samples.StormEvents",
-                    "Samples.PopulationData", 
-                    "ContosoSales.Products",
-                    "Github.GitHubEvents"
-                ],
-                "memory_stats": {
-                    "total_clusters": 1,
-                    "total_databases": 3,
-                    "total_tables": 15
-                },
-                "message": "Successfully discovered 15 tables across 3 databases using unified memory"
-            }
-        }
-    }
-    
-    return {
-        "description": "Discover and cache schema information",
-        "request": request,
-        "expected_response": expected_response,
-        "benefits": [
-            "Faster query development with autocomplete",
-            "AI-powered suggestions for table/column names",
-            "Reduced API calls to cluster",
-            "Better error messages with suggestions"
-        ]
-    }
-
-
-# ============================================================================
 # EXAMPLE 5: Performance Optimized Query
 # ============================================================================
 
@@ -311,11 +256,6 @@ def usage_patterns():
     """Document common usage patterns and best practices."""
     
     patterns = {
-        "workflow_1_new_cluster": [
-            "1. Run kql_schema_memory to discover schema",
-            "2. Execute queries with use_schema_context=True",
-            "3. Benefit from AI-powered suggestions and context"
-        ],
         
         "workflow_2_development": [
             "1. Use visualize=True for data exploration",
@@ -352,7 +292,6 @@ def main():
         example_basic_query(),
         example_json_processing(),
         example_security_analysis(),
-        example_schema_discovery(),
         example_performance_optimized(),
         example_custom_memory_path(),
         example_error_scenarios()

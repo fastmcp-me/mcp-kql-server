@@ -77,6 +77,8 @@ graph TD
 
 ### Schema Memory Discovery Flow
 
+The `kql_schema_memory` functionality is now seamlessly integrated into the `kql_execute` tool. When you run a query, the server automatically discovers and caches the schema for any tables it hasn't seen before. This on-demand process ensures you always have the context you need without any manual steps.
+
 ```mermaid
 graph TD
     A[👤 User Requests Schema Discovery] --> B[🔗 Connect to Cluster]
@@ -322,8 +324,7 @@ mcp-kql-server/
 │   ├── __init__.py          # Package initialization
 │   ├── mcp_server.py        # Main MCP server implementation
 │   ├── execute_kql.py       # KQL query execution logic
-│   ├── schema_memory.py     # Schema caching and discovery
-│   ├── unified_memory.py    # Advanced memory management
+│   ├── memory.py            # Advanced memory management
 │   ├── kql_auth.py          # Azure authentication
 │   ├── utils.py             # Utility functions
 │   └── constants.py         # Configuration constants
@@ -390,12 +391,13 @@ mcp-kql-server/
 
 2. **Memory Issues**
    ```bash
-   # Clear schema cache if corrupted (automatic backup created)
+   # The memory cache is now managed automatically. If you suspect issues,
+   # you can clear the cache directory, and it will be rebuilt on the next query.
    # Windows:
-   del "%APPDATA%\KQL_MCP\schema_memory.json"
+   rmdir /s /q "%APPDATA%\KQL_MCP\cluster_memory"
    
    # macOS/Linux:
-   rm ~/.local/share/KQL_MCP/schema_memory.json
+   rm -rf ~/.local/share/KQL_MCP/cluster_memory
    ```
 
 3. **Connection Timeouts**

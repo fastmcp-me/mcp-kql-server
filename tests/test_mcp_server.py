@@ -7,10 +7,7 @@ import unittest
 from mcp_kql_server.mcp_server import (
     KQLInput,
     KQLOutput,
-    KQLResult,
-    SchemaMemoryInput,
-    SchemaMemoryOutput,
-    SchemaMemoryResult
+    KQLResult
 )
 from mcp_kql_server.constants import TEST_CONFIG
 
@@ -51,7 +48,7 @@ class TestMCPServerModels(unittest.TestCase):
             rows=[["value1", "value2"], ["value3", "value4"]],
             row_count=2,
             visualization="| Column1 | Column2 |",
-            schema_context={"tables": ["TestTable"]}
+            schema_context=["TestTable"]
         )
         
         self.assertEqual(len(result.columns), 2)
@@ -79,73 +76,6 @@ class TestMCPServerModels(unittest.TestCase):
         self.assertEqual(output.error, "Test error")
         self.assertIsNone(output.result)
 
-    def test_schema_memory_input_model(self):
-        """Test schema memory input model validation."""
-        # With defaults
-        input_data = SchemaMemoryInput(cluster_uri=self.test_cluster_uri)
-        self.assertEqual(input_data.cluster_uri, self.test_cluster_uri)
-        self.assertFalse(input_data.force_refresh)  # Default value
-        self.assertIsNone(input_data.memory_path)  # Default value
-
-        # With all parameters
-        input_data = SchemaMemoryInput(
-            cluster_uri=self.test_cluster_uri,
-            memory_path="/custom/memory/path",
-            force_refresh=True
-        )
-        self.assertEqual(input_data.cluster_uri, self.test_cluster_uri)
-        self.assertEqual(input_data.memory_path, "/custom/memory/path")
-        self.assertTrue(input_data.force_refresh)
-
-    def test_schema_memory_result_model(self):
-        """Test schema memory result model creation."""
-        discovery_summary = {
-            "action": "discovered_new",
-            "databases": ["TestDB"],
-            "total_tables": 5,
-            "message": "Successfully discovered schema"
-        }
-        
-        result = SchemaMemoryResult(
-            cluster_uri=self.test_cluster_uri,
-            database_count=1,
-            total_tables=5,
-            memory_file_path="/path/to/schema.json",
-            timestamp="2025-01-26T12:00:00Z",
-            discovery_summary=discovery_summary
-        )
-        
-        self.assertEqual(result.cluster_uri, self.test_cluster_uri)
-        self.assertEqual(result.database_count, 1)
-        self.assertEqual(result.total_tables, 5)
-        self.assertEqual(result.memory_file_path, "/path/to/schema.json")
-        self.assertEqual(result.timestamp, "2025-01-26T12:00:00Z")
-        self.assertIsInstance(result.discovery_summary, dict)
-        self.assertEqual(result.discovery_summary["action"], "discovered_new")
-
-    def test_schema_memory_output_model(self):
-        """Test schema memory output model creation."""
-        # Success output
-        result = SchemaMemoryResult(
-            cluster_uri=self.test_cluster_uri,
-            database_count=1,
-            total_tables=5,
-            memory_file_path="/path/to/schema.json",
-            timestamp="2025-01-26T12:00:00Z",
-            discovery_summary={"action": "discovered_new"}
-        )
-        
-        output = SchemaMemoryOutput(status="success", result=result)
-        self.assertEqual(output.status, "success")
-        self.assertIsNotNone(output.result)
-        self.assertIsNone(output.error)
-
-        # Error output
-        output = SchemaMemoryOutput(status="error", error="Discovery failed")
-        self.assertEqual(output.status, "error")
-        self.assertEqual(output.error, "Discovery failed")
-        self.assertIsNone(output.result)
-
     def test_model_serialization(self):
         """Test model serialization to dict."""
         input_data = KQLInput(query=self.valid_query, visualize=True)
@@ -162,9 +92,6 @@ class TestMCPServerModels(unittest.TestCase):
         input_data = KQLInput(query="")
         self.assertEqual(input_data.query, "")
         
-        # Test with whitespace-only cluster URI
-        input_data = SchemaMemoryInput(cluster_uri="   ")
-        self.assertEqual(input_data.cluster_uri, "   ")
 
 
 if __name__ == '__main__':

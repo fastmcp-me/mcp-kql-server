@@ -13,6 +13,8 @@ import sys
 import logging
 from datetime import datetime
 from typing import List, Any, Union, Optional, Dict
+from azure.kusto.data import KustoClient
+from .memory import UnifiedSchemaMemory as UnifiedMemory
 
 # Suppress all possible FastMCP branding output
 os.environ['FASTMCP_QUIET'] = 'true'
@@ -47,15 +49,13 @@ from fastmcp import FastMCP
 from pydantic import BaseModel
 from .kql_auth import authenticate
 from .execute_kql import execute_kql_query
-from .schema_memory import (
-    extract_tables_from_query,
+from .memory import (
+    get_unified_memory,
     get_context_for_tables,
     update_memory_after_query,
-    _normalize_cluster_uri,
 )
-from .unified_memory import get_unified_memory
 from .constants import SERVER_NAME, __version__, ERROR_MESSAGES, SUCCESS_MESSAGES
-from .utils import format_error_message, is_debug_mode
+from .utils import format_error_message, is_debug_mode, extract_tables_from_query, normalize_cluster_uri as _normalize_cluster_uri
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -85,18 +85,13 @@ class SchemaMemoryInput(BaseModel):
     memory_path: Optional[str] = None
     force_refresh: bool = False
 
-class SchemaMemoryResult(BaseModel):
-    cluster_uri: str
-    database_count: int
-    total_tables: int
-    memory_file_path: str
-    timestamp: str
-    discovery_summary: Dict[str, Any]
-
 class SchemaMemoryOutput(BaseModel):
     status: str
-    result: Optional[SchemaMemoryResult] = None
-    error: Optional[str] = None
+    message: str
+    cluster_uri: str
+    discovered_databases: Optional[int] = None
+    discovered_tables: Optional[int] = None
+    memory_location: Optional[str] = None
 
 # Note: Authentication check moved to tool execution to avoid import-time failures
 
@@ -104,6 +99,20 @@ class SchemaMemoryOutput(BaseModel):
 server = FastMCP(
     name=SERVER_NAME
 )
+
+# Helper function for extracting visualization data
+def _extract_viz_and_context(result: List[Dict[str, Any]]) -> (Optional[str], Optional[List[str]]):
+    """Extracts visualization data and schema context from KQL results."""
+    viz_data = None
+    context_tokens = None
+    for row in result:
+        if "visualization" in row:
+            viz_data = row.get("visualization")
+            if "schema_context" in row:
+                context_tokens = row.get("schema_context", {}).get("context_tokens")
+            break
+    return viz_data, context_tokens
+
 
 # Define the enhanced KQL execution tool
 @server.tool()
@@ -150,14 +159,7 @@ async def kql_execute(input: KQLInput) -> KQLOutput:
         )
         # Separate data rows from visualization
         data_rows = [row for row in result if "visualization" not in row and "schema_context" not in row]
-        viz_data = None
-        context_tokens = None
-        for row in result:
-            if "visualization" in row:
-                viz_data = row.get("visualization")
-                if "schema_context" in row:
-                    context_tokens = row.get("schema_context", {}).get("context_tokens")
-                break
+        viz_data, context_tokens = _extract_viz_and_context(result)
         table_response = KQLResult(
             columns=list(data_rows[0].keys()) if data_rows else [],
             rows=[list(row.values()) for row in data_rows],
@@ -172,7 +174,7 @@ async def kql_execute(input: KQLInput) -> KQLOutput:
         logger.error(error_msg)
         return KQLOutput(status="error", error=error_msg)
 
-# Define the schema memory tool
+
 @server.tool()
 async def kql_schema_memory(input: SchemaMemoryInput) -> SchemaMemoryOutput:
     """
@@ -191,101 +193,34 @@ async def kql_schema_memory(input: SchemaMemoryInput) -> SchemaMemoryOutput:
     Returns:
         SchemaMemoryOutput: Output model with discovery status, statistics, and memory file location.
     """
-    if is_debug_mode():
-        logger.debug("Received schema memory request: %s", input.dict())
-    
-    cluster_uri = input.cluster_uri.strip()
-    if not cluster_uri:
-        return SchemaMemoryOutput(status="error", error="Cluster URI cannot be empty")
-
     try:
-        from azure.kusto.data import KustoClient, KustoConnectionStringBuilder
-        
-        # Use unified memory system for schema discovery
         memory = get_unified_memory(input.memory_path)
         
-        # Normalize cluster URI
-        normalized_uri = _normalize_cluster_uri(cluster_uri)
-        
-        # Connect to cluster and discover all tables
-        kcsb = KustoConnectionStringBuilder.with_az_cli_authentication(normalized_uri)
-        client = KustoClient(kcsb)
-        
-        total_tables = 0
-        database_count = 0
-        tables_discovered = []
-        
-        try:
-            # Get list of databases
-            databases_query = ".show databases"
-            db_response = client.execute_mgmt("", databases_query)
-            databases = []
-            
-            for row in db_response.primary_results[0]:
-                db_name = row['DatabaseName']
-                if db_name not in ['$systemdb']:  # Skip system databases
-                    databases.append(db_name)
-            
-            database_count = len(databases)
-            logger.info(f"Found {database_count} databases: {databases}")
-            
-            # For each database, discover tables and save to unified memory
-            for db_name in databases:
-                try:
-                    # Get tables in database
-                    tables_query = ".show tables"
-                    table_response = client.execute_mgmt(db_name, tables_query)
-                    
-                    for table_row in table_response.primary_results[0]:
-                        table_name = table_row['TableName']
-                        try:
-                            # Use unified memory system for schema discovery
-                            if memory.discover_and_save_table_schema(normalized_uri, db_name, table_name):
-                                tables_discovered.append(f"{db_name}.{table_name}")
-                                total_tables += 1
-                                logger.info(f"Discovered schema for {db_name}.{table_name}")
-                            else:
-                                logger.warning(f"Failed to discover schema for {db_name}.{table_name}")
-                        except Exception as e:
-                            logger.warning(f"Failed to discover schema for {db_name}.{table_name}: {str(e)}")
-                            
-                except Exception as e:
-                    logger.warning(f"Failed to process database {db_name}: {str(e)}")
-                    
-        finally:
-            client.close()
-        
-        # Get memory statistics
-        memory_stats = memory.get_memory_stats()
-        
-        # Create summary
-        discovery_summary = {
-            "action": "discovered_unified_memory",
-            "databases": databases,
-            "total_tables": total_tables,
-            "tables_discovered": tables_discovered,
-            "memory_stats": memory_stats,
-            "message": f"Successfully discovered {total_tables} tables across {database_count} databases using unified memory"
-        }
-        
-        logger.info(f"Schema discovery completed successfully for {normalized_uri}")
-        
-        return SchemaMemoryOutput(
-            status="success",
-            result=SchemaMemoryResult(
-                cluster_uri=normalized_uri,
-                database_count=database_count,
-                total_tables=total_tables,
-                memory_file_path=str(memory.memory_path),
-                timestamp=datetime.now().isoformat(),
-                discovery_summary=discovery_summary
-            )
+        success, db_count, table_count = memory.discover_and_save_cluster_schema(
+            input.cluster_uri,
+            force_refresh=input.force_refresh
         )
-        
+
+        if success:
+            return SchemaMemoryOutput(
+                status="success",
+                message=f"Successfully discovered schema for {db_count} databases and {table_count} tables.",
+                cluster_uri=input.cluster_uri,
+                discovered_databases=db_count,
+                discovered_tables=table_count,
+                memory_location=str(memory.memory_path)
+            )
+        else:
+            return SchemaMemoryOutput(
+                status="error",
+                message="Failed to discover cluster schema. Check logs for details.",
+                cluster_uri=input.cluster_uri
+            )
     except Exception as e:
         error_msg = format_error_message(e, "Schema memory discovery")
         logger.error(error_msg)
-        return SchemaMemoryOutput(status="error", error=error_msg)
+        return SchemaMemoryOutput(status="error", message=error_msg, cluster_uri=input.cluster_uri)
+
 
 def main():
     """Main entry point for the MCP KQL Server."""

@@ -12,11 +12,11 @@ Email: arjuntrivedi42@yahoo.com
 from typing import Dict, List
 
 # Version information
-__version__ = "2.0.4"
+__version__ = "2.0.5"
 MCP_PROTOCOL_VERSION = "2024-11-05"
 
 # Server configuration
-SERVER_NAME = "mcp-kql-server"
+SERVER_NAME = f"mcp-kql-server({__version__})"
 SERVER_DESCRIPTION = """AI-Enhanced KQL Server for Cybersecurity Analytics
 
 An intelligent Model Context Protocol (MCP) server that provides advanced KQL query execution
@@ -265,32 +265,6 @@ MCP_TOOLS = {
             "data_exploration"
         ]
     },
-    "kql_schema_memory": {
-        "name": "kql_schema_memory",
-        "description": """AI-Powered Schema Discovery & Memory Management
-        
-        Intelligent schema discovery system that builds comprehensive memory maps of
-        Azure Data Explorer clusters. Uses AI to generate semantic descriptions for
-        tables and columns, enabling natural language query assistance and automated
-        security analytics.
-        
-        Perfect for: Environment discovery, query optimization, AI assistant training
-        Security Focus: Identifies security tables, provides metadata enrichment
-        Memory Features: Persistent caching, incremental updates, cross-cluster support""",
-        "required_params": ["cluster_uri"],
-        "optional_params": ["memory_path", "force_refresh"],
-        "ai_capabilities": [
-            "semantic_table_description",
-            "intelligent_column_mapping",
-            "security_pattern_recognition"
-        ],
-        "outputs": [
-            "schema_intelligence_files",
-            "ai_generated_descriptions",
-            "security_table_catalog",
-            "column_metadata_enrichment"
-        ]
-    }
 }
 
 # HTTP status codes for error mapping
@@ -346,24 +320,7 @@ AI_RELEVANCE_TOKENS = {
     ]
 }
 
-# Security Analytics Use Cases
-SECURITY_USE_CASES = {
-    "threat_hunting": {
-        "description": "Proactive threat detection and analysis",
-        "tables": ["DeviceProcessEvents", "DeviceNetworkEvents", "SecurityEvent"],
-        "keywords": ["suspicious_process", "network_analysis", "process_monitoring"]
-    },
-    "incident_response": {
-        "description": "Rapid incident investigation and containment",
-        "tables": ["SecurityAlert", "SecurityIncident", "SigninLogs"],
-        "keywords": ["timeline_reconstruction", "incident_analysis", "impact_assessment"]
-    },
-    "compliance_monitoring": {
-        "description": "Regulatory compliance and audit support",
-        "tables": ["AuditLogs", "IdentityInfo", "OfficeActivity"],
-        "keywords": ["access_review", "privilege_audit", "policy_compliance"]
-    }
-}
+
 
 # Query Enhancement Patterns
 QUERY_ENHANCEMENT_PATTERNS = {

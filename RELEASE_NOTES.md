@@ -2,6 +2,62 @@
 
 ---
 
+## 🚀 **v2.0.5 - Hybrid Schema Discovery & Enhanced Workflow**
+
+> **Feature Release** ✨
+
+**Release Date**: August 8, 2025
+**Author**: Arjun Trivedi
+**Repository**: https://github.com/4R9UN/mcp-kql-server
+
+### 🚀 **What's New in v2.0.5**
+
+#### **Hybrid Schema Discovery Model**
+- **✅ Re-introduced `kql_schema_memory`**: The dedicated schema discovery tool is back, allowing for proactive, full-cluster schema caching.
+- **🧠 On-Demand & Proactive Caching**: Combines the convenience of on-demand caching (in `kql_execute`) with the thoroughness of proactive caching.
+- **⚡ Flexible Workflow**: Users can choose to pre-cache an entire cluster's schema for maximum AI context or rely on automatic, on-the-fly discovery.
+- **⚙️ Explicit Control**: Provides explicit control over schema memory for users who need to ensure comprehensive context is available before executing complex queries.
+
+### 🔧 **Technical Changes**
+
+#### **Code Refactoring & Re-implementation**
+- **Re-implemented `kql_schema_memory`**: The tool has been brought back as a distinct function in the server for explicit schema discovery.
+- **Updated `memory.py`**: Enhanced the `UnifiedSchemaMemory` class to support full-cluster discovery.
+- **Updated `mcp_server.py`**: The server now exposes both `kql_execute` and `kql_schema_memory` tools.
+- **Updated `README.md`**: Documentation updated to reflect the hybrid model and the availability of both tools.
+
+### 🐛 **Bug Fixes**
+- **N/A**: This release focuses on feature enhancement and workflow flexibility.
+
+### 📦 **Installation & Upgrade**
+
+#### **New Installation**
+```bash
+pip install mcp-kql-server==2.0.5
+```
+
+#### **Upgrade from Previous Versions**
+```bash
+pip install --upgrade mcp-kql-server
+```
+
+### 🎯 **Benefits**
+- **Workflow Flexibility**: Supports both proactive and on-demand schema discovery.
+- **Comprehensive AI Context**: Ability to pre-cache an entire cluster schema ensures maximum context for AI-powered queries.
+- **Enhanced Control**: Users have explicit control over when and how schema memory is built.
+- **Optimized for All Use Cases**: Efficient for both quick, single-table queries and complex, multi-table analysis.
+
+### 🛠️ **Working Tools (Verified)**
+1.  **[`kql_execute`](mcp_kql_server/mcp_server.py:107)** - Execute KQL queries with integrated, on-demand AI-enhanced schema intelligence.
+2.  **[`kql_schema_memory`](mcp_kql_server/mcp_server.py:165)** - Proactively discover and cache the schema for an entire KQL cluster.
+
+### ✅ **Quality Assurance**
+- **Full Test Suite**: All tests passing, adapted for the hybrid model.
+- **Package Verification**: Successfully built and verified package integrity.
+- **End-to-End Validation**: Confirmed both on-demand and proactive schema discovery workflows function correctly.
+
+---
+
 ## 🔧 **v2.0.4 - Azure Kusto Data Compatibility Fix**
 
 > **Patch Release** 🛠️

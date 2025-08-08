@@ -1,6 +1,6 @@
 [project]
 name = "mcp-kql-server"
-version = "2.0.4"
+version = "2.0.5"
 description = "AI-Powered MCP server for KQL query execution with intelligent schema memory and context assistance"
 authors = [{ name = "Arjun Trivedi", email = "arjuntrivedi42@yahoo.com" }]
 readme = "README.md"

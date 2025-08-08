@@ -16,29 +16,34 @@ from mcp_kql_server.kql_auth import (
 class TestKQLAuth(unittest.TestCase):
     """Test cases for KQL authentication functionality."""
 
+    def setUp(self):
+        """Clear cache before each test."""
+        kql_auth.cache_clear()
+
     @patch('mcp_kql_server.kql_auth.subprocess.run')
     def test_kql_auth_success(self, mock_run):
         """Test successful authentication check."""
         # Mock successful az command
-        mock_run.return_value = MagicMock(returncode=0)
+        mock_run.return_value = MagicMock(returncode=0, stdout='{}', stderr='')
         
         result = kql_auth()
         
         self.assertTrue(result["authenticated"])
-        self.assertIn("authenticated", result["message"].lower())
+        self.assertIn("user is authenticated", result["message"].lower())
 
     @patch('mcp_kql_server.kql_auth.subprocess.run')
     def test_kql_auth_failure(self, mock_run):
         """Test failed authentication check."""
-        # Mock failed az command
-        mock_run.side_effect = subprocess.CalledProcessError(
-            1, "az", stderr="Authentication failed"
-        )
+        # Mock first call success, second call failure
+        mock_run.side_effect = [
+            MagicMock(returncode=0),  # for 'az config'
+            subprocess.CalledProcessError(1, "az", stderr="Authentication failed") # for 'az account'
+        ]
         
         result = kql_auth()
         
         self.assertFalse(result["authenticated"])
-        self.assertIn("not authenticated", result["message"].lower())
+        self.assertIn("user is not authenticated", result["message"].lower())
 
     @patch('mcp_kql_server.kql_auth.subprocess.run')
     def test_kql_auth_exception(self, mock_run):
@@ -48,8 +53,8 @@ class TestKQLAuth(unittest.TestCase):
         
         result = kql_auth()
         
-        self.assertFalse(result["authenticated"])
-        self.assertIn("Unexpected error", result["message"])
+        self.assertFalse(result.get("authenticated"))
+        self.assertIn("unexpected error", result.get("message", "").lower())
 
     @patch('mcp_kql_server.kql_auth.subprocess.run')
     def test_trigger_az_cli_auth_success(self, mock_run):
@@ -81,8 +86,8 @@ class TestKQLAuth(unittest.TestCase):
         
         result = trigger_az_cli_auth()
         
-        self.assertFalse(result["authenticated"])
-        self.assertIn("timeout", result["message"].lower())
+        self.assertFalse(result.get("authenticated"))
+        self.assertIn("timed out", result.get("message", "").lower())
 
     @patch('mcp_kql_server.kql_auth.kql_auth')
     def test_authenticate_already_authenticated(self, mock_kql_auth):
@@ -146,26 +151,25 @@ class TestKQLAuth(unittest.TestCase):
         """Test platform-specific command selection."""
         # Test Windows
         mock_platform.return_value = "Windows"
-        mock_run.return_value = MagicMock(returncode=0)
-        
+        mock_run.return_value = MagicMock(returncode=0, stdout='{}', stderr='')
         kql_auth()
         
         # Check that az.cmd was used for Windows
-        calls = mock_run.call_args_list
-        self.assertTrue(any("az.cmd" in str(call) for call in calls))
+        first_call_args = mock_run.call_args_list[0].args[0]
+        self.assertIn("az.cmd", first_call_args)
         
-        # Reset mock
+        # Reset mock and clear cache
         mock_run.reset_mock()
+        kql_auth.cache_clear()
         
         # Test Linux/Mac
         mock_platform.return_value = "Linux"
-        mock_run.return_value = MagicMock(returncode=0)
-        
+        mock_run.return_value = MagicMock(returncode=0, stdout='{}', stderr='')
         kql_auth()
         
         # Check that az was used for Linux
-        calls = mock_run.call_args_list
-        self.assertTrue(any("az" in str(call) and "az.cmd" not in str(call) for call in calls))
+        first_call_args = mock_run.call_args_list[0].args[0]
+        self.assertEqual("az", first_call_args[0])
 
 
 if __name__ == '__main__':
