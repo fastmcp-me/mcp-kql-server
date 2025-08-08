@@ -1,6 +1,6 @@
 [project]
 name = "mcp-kql-server"
-version = "2.0.3"
+version = "2.0.4"
 description = "AI-Powered MCP server for KQL query execution with intelligent schema memory and context assistance"
 authors = [{ name = "Arjun Trivedi", email = "arjuntrivedi42@yahoo.com" }]
 readme = "README.md"
@@ -35,7 +35,7 @@ dependencies = [
     # MCP framework dependencies (essential)
     "fastmcp>=2.0.0,<3.0.0",
     # Azure dependencies for KQL/Kusto access (essential)
-    "azure-kusto-data>=4.0.0,<5.0.0",
+    "azure-kusto-data>=4.0.0,<6.0.0",
     "azure-identity>=1.15.0,<2.0.0",
     # Networking and HTTP dependencies (essential)
     "httpx>=0.25.0,<1.0.0",

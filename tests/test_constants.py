@@ -9,7 +9,7 @@ def test_version_constants():
     """Test version constants are properly defined."""
     try:
         from mcp_kql_server.constants import __version__
-        assert __version__ == "2.0.3"
+        assert __version__ == "2.0.4"
     except ImportError:
         # Skip test if module not available in CI
         pass

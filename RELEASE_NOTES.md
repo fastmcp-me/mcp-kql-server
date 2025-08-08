@@ -2,6 +2,139 @@
 
 ---
 
+## 🔧 **v2.0.4 - Azure Kusto Data Compatibility Fix**
+
+> **Patch Release** 🛠️
+
+**Release Date**: August 8, 2025
+**Author**: Arjun Trivedi
+**Repository**: https://github.com/4R9UN/mcp-kql-server
+
+### 🚀 **What's New in v2.0.4**
+
+#### **Dependency Compatibility Fix**
+- **🔧 Azure Kusto Data v5.x Support**: Updated dependency constraint to support `azure-kusto-data` versions 4.x and 5.x
+- **🛠️ Compatibility Resolution**: Fixed dependency conflict with `azure-kusto-ingest 5.0.5` which requires `azure-kusto-data==5.0.5`
+- **📦 Broader Version Range**: Changed constraint from `>=4.0.0,<5.0.0` to `>=4.0.0,<6.0.0`
+
+### 🔧 **Technical Changes**
+
+#### **Dependency Updates**
+- **Updated [`pyproject.toml`](pyproject.toml:38)**: Modified `azure-kusto-data` version constraint to `>=4.0.0,<6.0.0`
+- **Backward Compatibility**: Maintains support for existing 4.x installations
+- **Forward Compatibility**: Enables compatibility with latest 5.x versions
+
+### 🐛 **Bug Fixes**
+- **Fixed Installation Conflicts**: Resolved pip dependency resolver conflicts when `azure-kusto-ingest 5.0.5` is already installed
+- **Eliminated Version Constraints**: Removed restrictive upper bound that prevented 5.x compatibility
+
+### 📦 **Installation & Upgrade**
+
+#### **New Installation**
+```bash
+pip install mcp-kql-server==2.0.4
+```
+
+#### **Upgrade from Previous Versions**
+```bash
+pip install --upgrade mcp-kql-server
+```
+
+### 🎯 **Benefits**
+- **Seamless Upgrades**: No more dependency conflicts during installation
+- **Latest Azure SDK Support**: Compatible with the latest Azure Kusto Data SDK versions
+- **Enterprise Ready**: Works with existing Azure environments using latest SDKs
+
+### ✅ **Quality Assurance**
+- **Full Test Suite**: All tests passing (9/9 core functionality tests)
+- **Package Verification**: Successfully built and verified package integrity
+- **Dependency Validation**: Confirmed compatibility with both 4.x and 5.x versions
+
+---
+
+## 🧹 **v2.0.3 - Dependency Audit & Project Cleanup**
+
+> **Patch Release** 🛠️
+
+**Release Date**: August 8, 2025
+**Author**: Arjun Trivedi
+**Repository**: https://github.com/4R9UN/mcp-kql-server
+
+### 🚀 **What's New in v2.0.3**
+
+#### **Dependency Optimization**
+- **🔧 Comprehensive Dependency Audit**: Complete review and optimization of all dependencies
+- **📦 Version Bounds Added**: Upper version bounds added to prevent breaking changes
+- **🧹 Removed Redundant Dependencies**: Cleaned up unused packages (`mcp`, `azure-core`)
+- **✅ PEP 621 Compliance**: Maintained full compliance with modern Python packaging standards
+
+#### **Code Cleanup & Accuracy**
+- **🎯 Focused on Implemented Features**: Removed references to unimplemented functionality
+- **📝 Accurate Documentation**: Updated descriptions to reflect only working tools
+- **🔍 Truth in Advertising**: Cleaned up constants to match actual capabilities
+- **🚫 Emoji Removal**: Removed all emojis and symbols for professional appearance
+
+#### **Enhanced AI Capabilities**
+- **🧠 AI-Powered Constants**: Enhanced [`constants.py`](mcp_kql_server/constants.py:1) with comprehensive AI-relevant tokens
+- **🔐 Security Intelligence**: Improved security table patterns with analysis keywords
+- **📊 Column Analysis**: Enhanced column patterns with data type classifications and use cases
+- **🎨 Professional Visuals**: Updated README Mermaid diagrams with accessible color schemes
+
+### 🔧 **Technical Changes**
+
+#### **Dependency Management**
+- **Updated Version Bounds**: Added `<2.0` bounds to key dependencies for stability
+- **Removed Redundant Packages**: Eliminated duplicate and unused dependencies
+- **Optimized Install Size**: Reduced package footprint while maintaining functionality
+- **Lock File Alignment**: Ensured dependency versions align with lock file constraints
+
+#### **Constants Enhancement**
+- **AI Token Integration**: Added comprehensive AI-relevant tokens for better query assistance
+- **Security Mapping**: Enhanced security table patterns with MITRE ATT&CK context
+- **Column Intelligence**: Improved column pattern recognition with analysis tokens
+- **Professional Descriptions**: Updated all descriptions to be clean and professional
+
+#### **Documentation Updates**
+- **Accurate Tool Descriptions**: Updated MCP tool descriptions to reflect only implemented features
+- **Enhanced README**: Improved Mermaid diagrams with better color contrast for accessibility
+- **Clean Presentation**: Removed all emojis and symbols for corporate-friendly appearance
+
+### 🐛 **Bug Fixes**
+- **Fixed Accuracy Issues**: Removed references to unimplemented MITRE ATT&CK tools
+- **Corrected Dependencies**: Aligned declared dependencies with actual runtime requirements
+- **Package Integrity**: Ensured clean package build without unused components
+
+### 📦 **Installation & Upgrade**
+
+#### **New Installation**
+```bash
+pip install mcp-kql-server==2.0.3
+```
+
+#### **Upgrade from Previous Versions**
+```bash
+pip install --upgrade mcp-kql-server
+```
+
+### 🎯 **Benefits**
+- **Enhanced Reliability**: Improved dependency stability with proper version bounds
+- **Better AI Integration**: Enhanced constants provide better context for AI-powered queries
+- **Professional Appearance**: Clean, emoji-free interface suitable for enterprise environments
+- **Accurate Documentation**: Truth in advertising - only documented features are implemented
+- **Optimized Performance**: Reduced package size and improved dependency resolution
+
+### 🛠️ **Working Tools (Verified)**
+1. **[`kql_execute`](mcp_kql_server/server.py:1)** - Execute KQL queries with AI-enhanced intelligence
+2. **[`kql_schema_memory`](mcp_kql_server/server.py:1)** - AI-Powered Schema Discovery & Memory Management
+
+### ✅ **Quality Assurance**
+- **Full Test Suite**: All tests passing (4/4 core functionality tests)
+- **Package Verification**: Successfully built and verified package integrity
+- **Clean Installation**: Verified clean installation from PyPI without issues
+- **Dependency Validation**: All dependencies properly resolved and functional
+
+---
+
 ## 🔕 **v2.0.2 - FastMCP Branding Suppression**
 
 > **Patch Release** 🛠️
