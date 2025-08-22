@@ -19,7 +19,7 @@ A Model Context Protocol (MCP) server that provides intelligent KQL (Kusto Query
 [![Azure Data Explorer](https://img.shields.io/badge/Azure-Data%20Explorer-orange.svg)](https://azure.microsoft.com/en-us/services/data-explorer/)
 [![MCP Protocol](https://img.shields.io/badge/MCP-2024--11--05-blue.svg)](https://github.com/anthropics/mcp)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/4R9UN/mcp-kql-server/graphs/commit-activity)
-
+[![MCP Badge](https://lobehub.com/badge/mcp/4r9un-mcp-kql-server?style=plastic)](https://lobehub.com/mcp/4r9un-mcp-kql-server)
 ## 🚀 Features
 
 - **🎯 Intelligent KQL Execution**: Execute KQL queries against any Azure Data Explorer cluster
