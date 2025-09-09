@@ -409,7 +409,8 @@ class QueryProcessor:
             col = col.strip()
             if col:
                 col = re.sub(r'\s+(and|or|==|!=|<=|>=|<|>)\s*$', '', col, flags=re.IGNORECASE)
-                if col: columns.append(col)
+                if col:
+                    columns.append(col)
         return ', '.join(columns) if columns else "*"
 
 def normalize_name(name: str) -> str:
@@ -1085,7 +1086,7 @@ class QueryOptimizer:
             # Metric column optimizations
             if "METRIC_COLUMN" in tags or "NUMERIC" in tags:
                 # Add proper casting for numeric operations
-                if f"summarize" in optimized_query.lower() and col_name in optimized_query:
+                if "summarize" in optimized_query.lower() and col_name in optimized_query:
                     logger.debug(f"Optimizing numeric column {col_name} for aggregation")
             
             return optimized_query
@@ -1440,11 +1441,12 @@ class SchemaManager:
         Enhanced async wrapper for executing Kusto queries with comprehensive error handling,
         retry logic, connection validation, and graceful degradation.
         """
+        import asyncio
         import re
         import time
         from azure.kusto.data import KustoClient, KustoConnectionStringBuilder
         from .constants import (
-            CONNECTION_CONFIG, ERROR_HANDLING_CONFIG,
+            CONNECTION_CONFIG,
             RETRYABLE_ERROR_PATTERNS, NON_RETRYABLE_ERROR_PATTERNS
         )
         
@@ -1455,12 +1457,9 @@ class SchemaManager:
         retry_delay = CONNECTION_CONFIG.get("retry_delay", 2.0)
         backoff_factor = CONNECTION_CONFIG.get("retry_backoff_factor", 2.0)
         max_retry_delay = CONNECTION_CONFIG.get("max_retry_delay", 60.0)
-        connection_timeout = CONNECTION_CONFIG.get("connection_timeout", 30.0)
         
         def _is_retryable_error(error_str: str) -> bool:
             """Check if error matches retryable patterns."""
-            error_lower = error_str.lower()
-            
             # Check non-retryable patterns first (these take precedence)
             for pattern in NON_RETRYABLE_ERROR_PATTERNS:
                 if re.search(pattern, error_str, re.IGNORECASE):
@@ -2194,7 +2193,6 @@ class SchemaManager:
     def _generate_semantic_description(self, table: str, column_name: str, data_type: str, sample_values: List[str]) -> str:
         """Generate semantic description using data-driven heuristics."""
         desc_parts = []
-        column_lower = column_name.lower()
         
         # Determine column purpose based on name patterns
         purpose = self._determine_column_purpose(column_name, data_type, sample_values)
@@ -2304,7 +2302,7 @@ class SchemaManager:
             if numeric_values:
                 # Check for measurement patterns (e.g., all positive, decimal values)
                 return all(v >= 0 for v in numeric_values) or all('.' in str(v) for v in values[:3])
-        except:
+        except (ValueError, TypeError):
             return False
         return False
     

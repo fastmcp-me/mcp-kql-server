@@ -7,7 +7,7 @@ Email: arjuntrivedi42@yahoo.com
 
 import unittest
 import json
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch
 
 from mcp_kql_server.constants import TEST_CONFIG
 
@@ -54,9 +54,6 @@ class TestMCPServerFunctions(unittest.TestCase):
     def test_natural_language_query_processing(self):
         """Test natural language query processing logic."""
         from mcp_kql_server.mcp_server import _generate_kql_from_natural_language
-        
-        # Test with a simple natural language query
-        test_query = "show me data from the test table"
         
         # This would normally be an async function, but we're testing the logic
         # In a real test, you'd use asyncio.run() or similar

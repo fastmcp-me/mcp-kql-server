@@ -1820,7 +1820,7 @@ class MemoryManager:
                     if clean_col and not any(op in clean_col.lower() for op in ['(', ')', '+', '-', '*', '/']):
                         column_info[clean_col] = {
                             'data_type': 'string',  # Default type
-                            'description': f'Column derived from query analysis',
+                            'description': 'Column derived from query analysis',
                             'tags': ['DERIVED'],
                             'sample_values': []
                         }
@@ -1893,7 +1893,6 @@ class MemoryManager:
         
         for query_entry in queries:
             query = query_entry.get("query", "") if isinstance(query_entry, dict) else str(query_entry)
-            query_lower = query.lower()
             
             # Extract columns from various KQL operations
             self._extract_columns_from_project(query, columns)
@@ -1943,7 +1942,7 @@ class MemoryManager:
                     
                     columns[col_name] = {
                         'data_type': data_type,
-                        'description': f'Column from where clause analysis',
+                        'description': 'Column from where clause analysis',
                         'tags': ['FILTERED'],
                         'sample_values': [value] if value not in ['true', 'false', 'null'] else []
                     }

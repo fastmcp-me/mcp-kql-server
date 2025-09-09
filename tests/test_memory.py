@@ -5,11 +5,7 @@ Author: Arjun Trivedi
 Email: arjuntrivedi42@yahoo.com
 """
 
-import json
-import tempfile
 import unittest
-from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 from mcp_kql_server.memory import (
     get_knowledge_corpus,
