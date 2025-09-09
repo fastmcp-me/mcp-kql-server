@@ -17,7 +17,7 @@ import pandas as pd
 from azure.kusto.data import KustoClient, KustoConnectionStringBuilder
 from azure.kusto.data.exceptions import KustoServiceError
 
-from .utils import extract_cluster_and_database_from_query, extract_tables_from_query, generate_query_description, ErrorHandler, QueryProcessor
+from .utils import extract_cluster_and_database_from_query, extract_tables_from_query, generate_query_description, QueryProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -203,8 +203,6 @@ def should_retry_error(error_message: str, status_code: Optional[int] = None) ->
     return classification["is_retryable"]
 
 
-# Import these functions from utils for test compatibility
-from .utils import extract_cluster_and_database_from_query, extract_tables_from_query
 
 
 def clean_query_for_execution(query: str) -> str:

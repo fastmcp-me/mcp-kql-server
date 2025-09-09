@@ -12,7 +12,10 @@ Email: arjuntrivedi42@yahoo.com
 
 import logging
 import os
-from pathlib import Path
+
+from .constants import __version__ as VERSION
+from .execute_kql import execute_kql_query
+from .mcp_server import main
 
 # Version information
 __version__ = "2.0.6"
@@ -93,11 +96,6 @@ _suppress_fastmcp_branding()
 _suppress_azure_logs()
 _setup_memory_directories()
 
-from .constants import __version__ as VERSION
-from .execute_kql import execute_kql_query
-
-# Export main components
-from .mcp_server import main
 
 __all__ = [
     "main",
