@@ -37,7 +37,7 @@ def kql_auth():
             [az_command, "config", "set", "core.login_experience_v2=off"],
             env=env, capture_output=True, text=True, check=True
         )
-        result = subprocess.run(
+        subprocess.run(
             [az_command, "account", "get-access-token"],
             capture_output=True, text=True, check=True
         )

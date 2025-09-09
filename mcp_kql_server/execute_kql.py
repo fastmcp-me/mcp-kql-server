@@ -655,7 +655,6 @@ def bracket_suspect_identifiers(query: str) -> str:
     # More precise regex that handles project clauses specifically
     # First, handle project clauses specially
     def bracket_project_columns(project_match):
-        project_clause = project_match.group(0)
         project_content = project_match.group(1)
         
         # Split columns and bracket each one

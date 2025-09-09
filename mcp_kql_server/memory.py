@@ -347,7 +347,7 @@ class MemoryManager:
                     migrated_clusters[cluster_uri] = cluster_data
             
             corpus["clusters"] = migrated_clusters
-            logger.info(f"Successfully migrated corpus to v3.1 structure")
+            logger.info("Successfully migrated corpus to v3.1 structure")
             
         except Exception as e:
             logger.warning(f"Migration to v3.1 failed: {e}, using current structure")
@@ -2850,7 +2850,6 @@ def get_table_ai_token(cluster_uri: str, database: str, table: str) -> Optional[
     try:
         memory = get_memory_manager()
         normalized_cluster = memory._normalize_cluster_uri(cluster_uri)
-        cache_key = f"{normalized_cluster}/{database}/{table}"
 
         # Prefer token from stored table entry
         cluster_data = memory.corpus.get("clusters", {}).get(normalized_cluster, {})

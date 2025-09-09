@@ -16,7 +16,7 @@ import pandas as pd
 from fastmcp import FastMCP
 
 from .constants import (
-    SERVER_NAME, KQL_RESERVED_WORDS
+    SERVER_NAME
 )
 from .execute_kql import kql_execute_tool
 from .memory import get_memory_manager
@@ -492,40 +492,6 @@ def _generate_recommendations(session_queries: List[Dict]) -> List[str]:
     
     return recommendations
 
-
-def _validate_and_fix_generated_query(query: str, column_list: List[str]) -> str:
-    """
-    Validate and case-correct columns in generated KQL to prevent SEM0100 errors.
-    """
-    if not column_list:
-        return query
-    
-    try:
-        import re
-        # Create case-insensitive mapping
-        exact_columns = {col.lower(): col for col in column_list}
-        
-        # Fix column references in the query using regex substitution
-        def fix_column_case(match):
-            col = match.group(1)
-            return exact_columns.get(col.lower(), col)  # Return exact case or original if not found
-        
-        # Apply case correction to column references
-        # This regex matches word boundaries to avoid partial matches
-        corrected_query = re.sub(r'\b([A-Za-z_][A-Za-z0-9_]*)\b', fix_column_case, query)
-        
-        # Additional normalization using QueryOptimizer
-        try:
-            optimizer = QueryOptimizer()
-            corrected_query = optimizer.validate_projected_columns(corrected_query, {"columns": column_list})
-        except Exception as opt_error:
-            logger.debug(f"Query optimizer normalization failed: {opt_error}")
-        
-        return corrected_query
-        
-    except Exception as e:
-        logger.warning(f"Query validation and case-correction failed: {e}")
-        return query  # Return original query if correction fails
 
 
 def _format_report_markdown(report: Dict) -> str:

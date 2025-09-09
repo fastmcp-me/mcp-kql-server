@@ -21,13 +21,12 @@ Functions implemented here:
 from pathlib import Path
 import os
 import re
-import asyncio
 import logging
 import json
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from .constants import KQL_RESERVED_WORDS, get_dynamic_table_analyzer, get_dynamic_column_analyzer, KQL_OPERATORS
+from .constants import KQL_RESERVED_WORDS, get_dynamic_table_analyzer, get_dynamic_column_analyzer
 
 # Set up logger at module level
 logger = logging.getLogger(__name__)
@@ -221,16 +220,17 @@ class QueryProcessor:
         if not query or not query.strip():
             return query
         
-        original_query = query
         query = query.strip()
         
         if re.search(r'\s+(and|or)\s*$', query, re.IGNORECASE):
             fixed_query = re.sub(r'\s+(and|or)\s*$', '', query, flags=re.IGNORECASE)
-            if fixed_query.strip(): query = fixed_query
+            if fixed_query.strip():
+                query = fixed_query
         
         if query.rstrip().endswith('|'):
             fixed_query = query.rstrip('|').strip()
-            if fixed_query.strip(): query = fixed_query
+            if fixed_query.strip():
+                query = fixed_query
         
         if re.search(r'(==|!=|<=|>=)\s*(==|!=|<=|>=)', query):
             query = re.sub(r'(==|!=|<=|>=)\s*(==|!=|<=|>=)', r'\1', query)
@@ -242,13 +242,14 @@ class QueryProcessor:
             query = self._fix_join_syntax(query)
         
         if not query.strip():
-            return original_query
+            return query
         
         return query
 
     def _normalize_join_on_clause(self, kql: str) -> str:
         """Normalizes join 'on' clauses to fix common syntax errors."""
-        if " join " not in kql.lower(): return kql
+        if " join " not in kql.lower():
+            return kql
         try:
             return self.join_on_pattern.sub(self._replace_join_clause, kql)
         except Exception as e:
@@ -274,9 +275,11 @@ class QueryProcessor:
 
     def _validate_projected_columns(self, query: str, schema: Dict[str, Any]) -> str:
         """Validates columns in a 'project' clause against a schema."""
-        if not schema or not isinstance(schema, dict): return query
+        if not schema or not isinstance(schema, dict):
+            return query
         schema_cols = get_schema_column_names(schema) or []
-        if not schema_cols: return query
+        if not schema_cols:
+            return query
         lower_map = {c.lower(): c for c in schema_cols}
         try:
             return self.project_pattern.sub(lambda m: self._clean_project(m, lower_map), query)
@@ -313,12 +316,11 @@ class QueryProcessor:
 
         valid_parts = []
         for p in parts:
-            if not p or p.isspace(): continue
+            if not p or p.isspace():
+                continue
 
             # Check if it's a simple identifier (not an alias or function call)
-            is_simple_identifier = re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", p)
-
-            if is_simple_identifier:
+            if re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", p):
                 if p.lower() in lower_map:
                     # It's a valid column, use the correct casing
                     valid_parts.append(bracket_if_needed(lower_map[p.lower()]))
@@ -334,9 +336,11 @@ class QueryProcessor:
 
     def _validate_all_query_columns(self, query: str, schema: Dict[str, Any]) -> str:
         """Replaces all column identifiers with their real-cased and properly bracketed names from the schema."""
-        if not schema or not isinstance(schema, dict): return query
+        if not schema or not isinstance(schema, dict):
+            return query
         cols = get_schema_column_names(schema) or []
-        if not cols: return query
+        if not cols:
+            return query
         
         mapping = {c.lower(): c for c in cols}
 
@@ -398,7 +402,8 @@ class QueryProcessor:
 
     def _normalize_project_clause(self, project_content: str) -> str:
         """Enhanced normalize project clause to prevent column resolution errors."""
-        if not project_content: return "*"
+        if not project_content:
+            return "*"
         columns = []
         for col in project_content.split(','):
             col = col.strip()
@@ -544,9 +549,6 @@ class ErrorHandler:
             }
 
         error_str = str(e).lower()
-        suggestions = []
-        recovery_actions = []
-        error_type = "kusto_service_error"
         
         # Comprehensive Kusto-specific error patterns with detailed coverage
         error_patterns = {
@@ -784,27 +786,27 @@ class ErrorHandler:
         return error_response
 
 __all__ = [
-    "normalize_join_on_clause",
-    "get_schema_discovery",
-    "get_schema_discovery_status",
+    "QueryProcessor",
+    "normalize_name",
+    "ErrorHandler",
+    "QueryOptimizer",
+    "bracket_if_needed",
     "get_default_cluster_memory_path",
     "ensure_directory_exists",
     "sanitize_filename",
     "get_schema_column_names",
+    "normalize_join_on_clause",
     "validate_projected_columns",
     "validate_all_query_columns",
+    "SchemaManager",
+    "get_schema_discovery",
+    "get_schema_discovery_status",
     "fix_query_with_real_schema",
     "generate_query_description",
-    "SchemaManager",
-    "SchemaDiscovery",
-    "bracket_if_needed",
+    "QueryParser",
+    "parse_query_entities",
     "extract_cluster_and_database_from_query",
     "extract_tables_from_query",
-    "QueryParser",
-    "QueryOptimizer",
-    "QueryProcessor",
-    "normalize_name",
-    "ErrorHandler",
 ]
  
 class QueryOptimizer:
@@ -873,8 +875,10 @@ class QueryOptimizer:
         cur = ""
         depth = 0
         for ch in project_content:
-            if ch == "(": depth += 1
-            elif ch == ")": depth = max(0, depth - 1)
+            if ch == "(":
+                depth += 1
+            elif ch == ")":
+                depth = max(0, depth - 1)
             if ch == "," and depth == 0:
                 parts.append(cur.strip())
                 cur = ""
@@ -1275,7 +1279,7 @@ def ensure_directory_exists(path: Path) -> bool:
         p = Path(path)
         p.mkdir(parents=True, exist_ok=True)
         return True
-    except Exception:
+    except OSError:
         return False
 
 
@@ -1321,7 +1325,7 @@ def get_schema_column_names(schema: Optional[Dict[str, Any]]) -> List[str]:
             if colname_key and colname_key in df.columns:
                 try:
                     return [str(v) for v in df[colname_key].astype(str).tolist()]
-                except Exception:
+                except (KeyError, AttributeError):
                     pass
 
             # Fallback: use the first column value from each row
@@ -1330,10 +1334,10 @@ def get_schema_column_names(schema: Optional[Dict[str, Any]]) -> List[str]:
                 try:
                     if len(row.index) > 0:
                         names.append(str(row.iloc[0]))
-                except Exception:
+                except IndexError:
                     continue
             return names
-    except Exception:
+    except ImportError:
         # pandas not available or not a DataFrame-like object; fall back to dict handling
         pass
 
@@ -1344,7 +1348,7 @@ def get_schema_column_names(schema: Optional[Dict[str, Any]]) -> List[str]:
             cols = schema.get("columns")
             if isinstance(cols, dict):
                 return list(cols.keys())
-        except Exception:
+        except (AttributeError, TypeError):
             pass
 
         # Preferred legacy format: column_types mapping {col: {...}}
@@ -1352,7 +1356,7 @@ def get_schema_column_names(schema: Optional[Dict[str, Any]]) -> List[str]:
             ct = schema.get("column_types")
             if isinstance(ct, dict) and ct:
                 return list(ct.keys())
-        except Exception:
+        except (AttributeError, TypeError):
             pass
 
         # Legacy format: 'columns' list (strings or dicts)
@@ -1374,10 +1378,10 @@ def get_schema_column_names(schema: Optional[Dict[str, Any]]) -> List[str]:
                             try:
                                 first_val = next(iter(c.values()))
                                 names.append(str(first_val))
-                            except Exception:
+                            except StopIteration:
                                 continue
                 return names
-        except Exception:
+        except (AttributeError, TypeError):
             pass
 
     # If all attempts fail, return an empty list
@@ -1699,7 +1703,7 @@ class SchemaManager:
             sample_response = None
             try:
                 sample_response = await client.execute("", sample_query)
-            except:
+            except Exception:
                 pass  # Sample data is optional
 
             schema_info = {
@@ -2851,8 +2855,7 @@ def fix_query_with_real_schema(query: str) -> str:
     if not query or not isinstance(query, str):
         return query
     # Detect the pattern cluster('..').database('..') - if not present, bail out
-    m = re.search(r"cluster\(['\"]([^'\"]+)['\"]\)\.database\(['\"]([^'\"]+)['\"]\)", query)
-    if not m:
+    if not re.search(r"cluster\(['\"]([^'\"]+)['\"]\)\.database\(['\"]([^'\"]+)['\"]\)", query):
         return query
     # For now return unchanged; richer behavior can be added later
     return query
@@ -2954,4 +2957,3 @@ def extract_tables_from_query(query: str) -> List[str]:
     """Extract table names from a KQL query."""
     entities = _parser.parse(query)
     return entities["tables"]
-
