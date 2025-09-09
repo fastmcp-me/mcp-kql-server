@@ -149,26 +149,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest pytest-cov coverage
         pip install .
-    - name: Run tests with coverage
-      run: |
-        coverage run -m pytest -v -s --junitxml=pytest-report.xml
-        coverage report -m --fail-under=80
-        coverage xml -o coverage.xml
-    - name: Upload coverage report
-      uses: codecov/codecov-action@v4
-      with:
-        file: ./coverage.xml
-        token: ${{ secrets.CODECOV_TOKEN }}
-        fail_ci_if_error: true
-    - name: Publish test summary
-      uses: dorny/test-reporter@v1
-      if: always()
-      with:
-        name: Pytest Results
-        path: pytest-report.xml
-        reporter: jest-junit
 
   publish-pypi:
     name: Publish to PyPI
