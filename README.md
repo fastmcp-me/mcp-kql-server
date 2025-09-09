@@ -19,20 +19,33 @@ A Model Context Protocol (MCP) server that provides intelligent KQL (Kusto Query
 [![Azure Data Explorer](https://img.shields.io/badge/Azure-Data%20Explorer-orange.svg)](https://azure.microsoft.com/en-us/services/data-explorer/)
 [![MCP Protocol](https://img.shields.io/badge/MCP-2024--11--05-blue.svg)](https://github.com/anthropics/mcp)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/4R9UN/mcp-kql-server/graphs/commit-activity)
+[![MCP Badge](https://lobehub.com/badge/mcp/4r9un-mcp-kql-server?style=for-the-badge)](https://lobehub.com/mcp/4r9un-mcp-kql-server)
+
+
+## 🎬 Demo
+
+Watch a quick demo of the MCP KQL Server in action:
+
+[![MCP KQL Server Demo](https://img.youtube.com/vi/Ca-yuThJ3Vc/0.jpg)](https://www.youtube.com/watch?v=Ca-yuThJ3Vc)
 
 ## 🚀 Features
 
-- **🎯 Intelligent KQL Execution**: Execute KQL queries against any Azure Data Explorer cluster
-- **🧠 AI Schema Memory**: Automatic schema discovery and intelligent caching
-- **📊 Rich Visualizations**: Markdown table output with configurable formatting
-- **⚡ Performance Optimized**: Smart caching reduces cluster API calls
-- **🔐 Azure Authentication**: Seamless Azure CLI integration
-- **🎨 Context-Aware**: AI-powered query assistance and error suggestions
-- **🔕 Clean Output**: Suppressed FastMCP branding for professional experience (v2.0.2+)
+- **`execute_kql_query`**:
+    - **Natural Language to KQL**: Generate KQL queries from natural language descriptions.
+    - **Direct KQL Execution**: Execute raw KQL queries.
+    - **Multiple Output Formats**: Supports JSON, CSV, and table formats.
+    - **Live Schema Validation**: Ensures query accuracy by using live schema discovery.
+
+- **`schema_memory`**:
+    - **Schema Discovery**: Discover and cache schemas for tables.
+    - **Database Exploration**: List all tables within a database.
+    - **AI Context**: Get AI-driven context for tables.
+    - **Analysis Reports**: Generate reports with visualizations.
+    - **Cache Management**: Clear or refresh the schema cache.
+    - **Memory Statistics**: Get statistics about the memory usage.
+
 
 ## 📊 MCP Tools Execution Flow
-
-### KQL Query Execution Flow
 
 ```mermaid
 graph TD
@@ -109,7 +122,7 @@ graph TD
 ## 📋 Prerequisites
 
 - Python 3.10 or higher
-- Azure CLI installed and authenticated (`az login`)
+- [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?view=azure-cli-latest&pivots=msi) installed and authenticated (`az login`)
 - Access to Azure Data Explorer cluster(s)
 
 ## 🚀 One-Command Installation
@@ -156,46 +169,47 @@ Add to your Claude Desktop MCP settings file (`mcp_settings.json`):
   }
 }
 ```
-
 ### VSCode (with MCP Extension)
 
 Add to your VSCode MCP configuration:
 
 **Settings.json location:**
-- **Windows**: `%APPDATA%\Code\User\settings.json`
-- **macOS**: `~/Library/Application Support/Code/User/settings.json`
-- **Linux**: `~/.config/Code/User/settings.json`
+- **Windows**: `%APPDATA%\Code\User\mcp.json`
+- **macOS**: `~/Library/Application Support/Code/User/mcp.json`
+- **Linux**: `~/.config/Code/User/mcp.json`
 
 ```json
 {
-  "mcp.servers": {
-    "mcp-kql-server": {
-      "command": "python",
-      "args": ["-m", "mcp_kql_server"],
-      "cwd": null,
-      "env": {}
-    }
-  }
+ "MCP-kql-server": {
+			"command": "python",
+			"args": [
+				"-m",
+				"mcp_kql_server"
+			],
+			"type": "stdio"
+		},
 }
 ```
 
-### Roo-code (Cline Extension)
+### Roo-code Or Cline (VS-code Extentions)
 
-Add to your Roo-code MCP settings:
+Ask or Add to your Roo-code Or Cline MCP settings:
 
 **MCP Settings location:**
 - **All platforms**: Through Roo-code extension settings or `mcp_settings.json`
 
 ```json
 {
-  "mcpServers": {
-    "kql-server": {
+   "MCP-kql-server": {
       "command": "python",
-      "args": ["-m", "mcp_kql_server"],
-      "env": {},
-      "description": "KQL Server for Azure Data Explorer queries with AI assistance"
-    }
-  }
+      "args": [
+        "-m",
+        "mcp_kql_server"
+      ],
+      "type": "stdio",
+      "alwaysAllow": [
+      ]
+    },
 }
 ```
 
@@ -210,24 +224,6 @@ python -m mcp_kql_server
 # Server provides these tools:
 # - kql_execute: Execute KQL queries with AI context
 # - kql_schema_memory: Discover and cache cluster schemas
-```
-
-### Configuration with Environment Variables
-
-You can customize the server behavior with environment variables:
-
-```json
-{
-  "mcpServers": {
-    "mcp-kql-server": {
-      "command": "python",
-      "args": ["-m", "mcp_kql_server"],
-      "env": {
-        
-      }
-    }
-  }
-}
 ```
 ## 🔧 Quick Start
 
@@ -334,45 +330,6 @@ mcp-kql-server/
 └── README.md               # This file
 ```
 
-## 🚀 Advanced Usage
-
-### Custom Memory Path
-
-```python
-{
-    "tool": "kql_execute",
-    "input": {
-        "query": "...",
-        "cluster_memory_path": "/custom/memory/path"
-    }
-}
-```
-
-### Force Schema Refresh
-
-```python
-{
-    "tool": "kql_schema_memory",
-    "input": {
-        "cluster_uri": "mycluster",
-        "force_refresh": true
-    }
-}
-```
-
-### Performance Optimization
-
-```python
-{
-    "tool": "kql_execute",
-    "input": {
-        "query": "...",
-        "use_schema_context": false,  # Disable for faster execution
-        "visualize": false           # Disable for minimal response
-    }
-}
-```
-
 ## 🔒 Security
 
 - **Azure CLI Authentication**: Leverages your existing Azure device login
@@ -394,7 +351,7 @@ mcp-kql-server/
    # The memory cache is now managed automatically. If you suspect issues,
    # you can clear the cache directory, and it will be rebuilt on the next query.
    # Windows:
-   rmdir /s /q "%APPDATA%\KQL_MCP\cluster_memory"
+   rmdir /s /q "%APPDATA%\KQL_MCP\unified_memory.json"
    
    # macOS/Linux:
    rm -rf ~/.local/share/KQL_MCP/cluster_memory
@@ -404,10 +361,6 @@ mcp-kql-server/
    - Check cluster URI format
    - Verify network connectivity
    - Confirm Azure permissions
-
-4. **Memory Path Issues**
-   - Server automatically creates fallback directory in `~/.kql_mcp_memory` if default path fails
-   - Check logs for memory path initialization messages
 
 ## 🤝 Contributing
 

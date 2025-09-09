@@ -14,6 +14,7 @@ import os
 import logging
 from functools import lru_cache
 from tenacity import retry, stop_after_attempt, wait_exponential
+from typing import Dict, Any
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -108,6 +109,15 @@ def authenticate():
         logger.info("3. Try running 'az login' directly in your terminal")
     
     return auth_status
+
+def authenticate_kusto() -> Dict[str, Any]:
+    """
+    Wrapper function for compatibility with existing code.
+    
+    Returns:
+        dict: Authentication status and message
+    """
+    return authenticate()
 
 if __name__ == "__main__":
     result = authenticate()

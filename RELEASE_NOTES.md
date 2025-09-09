@@ -2,6 +2,69 @@
 
 ---
 
+## 🚀 **v2.0.6 - Architectural Refactoring & Intelligence Upgrade**
+
+> **Major Refactor Release**  архитектура
+
+**Release Date**: September 9, 2025
+**Author**: Arjun Trivedi
+**Email**: arjuntrivedi42@yahoo.com
+**Repository**: https://github.com/4R9UN/mcp-kql-server
+
+### 🚀 **What's New in v2.0.6**
+
+This release marks a significant architectural evolution of the MCP KQL Server, focusing on maintainability, robustness, and enhanced intelligence. The entire codebase has been refactored to introduce a centralized processing pipeline and dynamic, context-aware schema analysis.
+
+#### **1. Centralized Processing Pipeline (`utils.py`)**
+- **✅ `QueryProcessor` Class**: A dedicated class now handles all query pre-processing, including cleaning, validation, and parsing of cluster/database information. This standardizes input handling.
+- **✅ `ErrorHandler` Class**: A robust, centralized error handler that classifies Kusto exceptions and provides structured, actionable error messages. This dramatically improves the user experience when queries fail.
+- **✅ `SchemaManager` Class**: A utility helper for managing and formatting schema information consistently.
+
+#### **2. Dynamic Schema Intelligence (`constants.py`)**
+- **🧠 `DynamicSchemaAnalyzer`**: Moves beyond static keywords to intelligently analyze table names and properties, generating richer, more accurate AI-friendly descriptions.
+- **🧠 `DynamicColumnAnalyzer`**: Analyzes column names and data types to infer semantics, use cases, and relationships, providing deeper context to the AI model.
+
+#### **3. Asynchronous Post-Query Learning (`execute_kql.py`)**
+- **⚡ Async Learning**: After a successful query, a non-blocking background task (`post_query_learning`) is now spawned to update the unified memory. This ensures the server remains responsive while continuously learning.
+
+#### **4. Codebase Refactoring & Clarity**
+- **🧹 Separation of Concerns**: Each module now has a more clearly defined responsibility, from authentication (`kql_auth.py`) to memory (`memory.py`) to execution (`execute_kql.py`).
+- **📝 Updated Documentation**: The `docs/architecture.md` file has been completely rewritten to reflect the new, more sophisticated architecture.
+- **👤 Author Validation**: Ensured all core files contain up-to-date author and contact information.
+
+### 🔧 **Technical Changes**
+
+- **Refactored `mcp_server.py`**: The main server file now orchestrates calls to the new utility classes in `utils.py`, simplifying its logic.
+- **Introduced `utils.py`**: This new module contains the core business logic, abstracting it away from the MCP tool definitions.
+- **Enhanced `constants.py`**: Expanded from a simple constants file to an intelligence hub containing the dynamic analyzer classes.
+- **Modified `execute_kql.py`**: Updated to use the new `ErrorHandler` and to trigger the asynchronous learning task.
+- **Updated `memory.py`**: The `MemoryManager` now leverages the dynamic analyzers from `constants.py` to enrich schemas.
+
+### 🎯 **Benefits**
+- **Maintainability**: The new architecture is significantly easier to understand, maintain, and extend.
+- **Robustness**: Centralized error handling provides more consistent and helpful feedback.
+- **Intelligence**: Dynamic schema analysis delivers far superior context to the AI, enabling more accurate and powerful query generation.
+- **Performance**: Asynchronous learning ensures the server's core functionality is not blocked by background tasks.
+
+### 📦 **Installation & Upgrade**
+
+#### **New Installation**
+```bash
+pip install mcp-kql-server==2.0.6
+```
+
+#### **Upgrade from Previous Versions**
+```bash
+pip install --upgrade mcp-kql-server
+```
+
+### ✅ **Quality Assurance**
+- **Full Test Suite**: All existing tests were updated and are passing, ensuring backward compatibility of features.
+- **Architectural Review**: The new architecture has been documented and reviewed for clarity and correctness.
+- **End-to-End Validation**: Confirmed that the entire query pipeline—from processing to execution to learning—functions as expected.
+
+---
+
 ## 🚀 **v2.0.5 - Hybrid Schema Discovery & Enhanced Workflow**
 
 > **Feature Release** ✨
@@ -275,7 +338,7 @@ pip install --upgrade mcp-kql-server
 
 ### 📦 **Flexible Dependency Management**
 - **Minimal Core**: Essential dependencies only for basic functionality
-- **Optional Extras**: Choose what you need with `[azure]`, `[mcp]`, `[full]`, `[dev]` options
+-- **Optional Extras**: Choose what you need with `[azure]`, `[mcp]`, `[full]`, `[dev]` options
 - **Installation Flexibility**: From minimal CI-friendly to full-featured production installs
 
 ### 🔧 **Production-Ready CI/CD Pipeline**

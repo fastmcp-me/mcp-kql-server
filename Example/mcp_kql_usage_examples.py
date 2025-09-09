@@ -7,15 +7,16 @@ for various KQL query scenarios and schema management.
 """
 
 import json
-from typing import Dict, Any
+from typing import Any, Dict
 
 # ============================================================================
 # EXAMPLE 1: Basic KQL Query Execution
 # ============================================================================
 
+
 def example_basic_query() -> Dict[str, Any]:
     """Execute a basic KQL query with visualization."""
-    
+
     request = {
         "tool": "kql_execute",
         "input": {
@@ -29,10 +30,10 @@ def example_basic_query() -> Dict[str, Any]:
                 | top 5 by EventCount desc
             """,
             "visualize": True,
-            "use_schema_context": True
-        }
+            "use_schema_context": True,
+        },
     }
-    
+
     # Expected response structure:
     expected_response = {
         "status": "success",
@@ -43,21 +44,21 @@ def example_basic_query() -> Dict[str, Any]:
                 ["Thunderstorm Wind", 568],
                 ["Flash Flood", 289],
                 ["Tornado", 187],
-                ["Heavy Rain", 156]
+                ["Heavy Rain", 156],
             ],
             "row_count": 5,
             "visualization": "| EventType | EventCount |\n|---|---|\n| Hail | 742 |\n...",
             "schema_context": [
                 "Table: StormEvents - Contains storm and weather event data...",
-                "Key columns: StartTime, EndTime, State, EventType, DamageProperty"
-            ]
-        }
+                "Key columns: StartTime, EndTime, State, EventType, DamageProperty",
+            ],
+        },
     }
-    
+
     return {
         "description": "Basic query with aggregation and filtering",
         "request": request,
-        "expected_response": expected_response
+        "expected_response": expected_response,
     }
 
 
@@ -65,9 +66,10 @@ def example_basic_query() -> Dict[str, Any]:
 # EXAMPLE 2: Complex JSON Processing Query
 # ============================================================================
 
+
 def example_json_processing() -> Dict[str, Any]:
     """Execute a complex query with JSON parsing and extraction."""
-    
+
     request = {
         "tool": "kql_execute",
         "input": {
@@ -91,14 +93,14 @@ def example_json_processing() -> Dict[str, Any]:
                 | limit 10
             """,
             "visualize": True,
-            "use_schema_context": True
-        }
+            "use_schema_context": True,
+        },
     }
-    
+
     return {
         "description": "Complex query with JSON processing and user analytics",
         "request": request,
-        "use_case": "Analyze user activity patterns from application logs"
+        "use_case": "Analyze user activity patterns from application logs",
     }
 
 
@@ -106,9 +108,10 @@ def example_json_processing() -> Dict[str, Any]:
 # EXAMPLE 3: Security Analysis Query
 # ============================================================================
 
+
 def example_security_analysis() -> Dict[str, Any]:
     """Execute a security-focused query with threat detection."""
-    
+
     request = {
         "tool": "kql_execute",
         "input": {
@@ -130,14 +133,14 @@ def example_security_analysis() -> Dict[str, Any]:
                 | order by FailedAttempts desc
             """,
             "visualize": True,
-            "use_schema_context": True
-        }
+            "use_schema_context": True,
+        },
     }
-    
+
     return {
         "description": "Security analysis for suspicious login patterns",
         "request": request,
-        "use_case": "Detect potential brute force attacks or compromised accounts"
+        "use_case": "Detect potential brute force attacks or compromised accounts",
     }
 
 
@@ -145,9 +148,10 @@ def example_security_analysis() -> Dict[str, Any]:
 # EXAMPLE 5: Performance Optimized Query
 # ============================================================================
 
+
 def example_performance_optimized() -> Dict[str, Any]:
     """Execute a query optimized for performance."""
-    
+
     request = {
         "tool": "kql_execute",
         "input": {
@@ -165,10 +169,10 @@ def example_performance_optimized() -> Dict[str, Any]:
                 | order by TimeGenerated desc
             """,
             "visualize": False,  # Disable for faster response
-            "use_schema_context": False  # Skip context loading for speed
-        }
+            "use_schema_context": False,  # Skip context loading for speed
+        },
     }
-    
+
     return {
         "description": "Performance-optimized query execution",
         "request": request,
@@ -176,8 +180,8 @@ def example_performance_optimized() -> Dict[str, Any]:
             "Disabled visualization for faster response",
             "Disabled schema context loading",
             "Used specific time ranges",
-            "Efficient aggregation with bin()"
-        ]
+            "Efficient aggregation with bin()",
+        ],
     }
 
 
@@ -185,9 +189,10 @@ def example_performance_optimized() -> Dict[str, Any]:
 # EXAMPLE 6: Custom Memory Path
 # ============================================================================
 
+
 def example_custom_memory_path() -> Dict[str, Any]:
     """Use custom memory path for project-specific schema caching."""
-    
+
     request = {
         "tool": "kql_execute",
         "input": {
@@ -199,14 +204,14 @@ def example_custom_memory_path() -> Dict[str, Any]:
             """,
             "cluster_memory_path": "/projects/myproject/kql_memory",
             "visualize": True,
-            "use_schema_context": True
-        }
+            "use_schema_context": True,
+        },
     }
-    
+
     return {
         "description": "Query with custom memory path for project isolation",
         "request": request,
-        "use_case": "Separate schema caches for different projects"
+        "use_case": "Separate schema caches for different projects",
     }
 
 
@@ -214,9 +219,10 @@ def example_custom_memory_path() -> Dict[str, Any]:
 # EXAMPLE 7: Error Handling and Debugging
 # ============================================================================
 
+
 def example_error_scenarios() -> Dict[str, Any]:
     """Examples of common errors and how the system handles them."""
-    
+
     # Example of query with syntax error
     error_request = {
         "tool": "kql_execute",
@@ -227,15 +233,15 @@ def example_error_scenarios() -> Dict[str, Any]:
                 .NonExistentTable  // This table doesn't exist
                 | take 10
             """,
-            "visualize": True
-        }
+            "visualize": True,
+        },
     }
-    
+
     expected_error_response = {
         "status": "error",
-        "error": "KQL execution: KustoServiceError - Table 'NonExistentTable' not found. Did you mean 'StormEvents' or 'PopulationData'?"
+        "error": "KQL execution: KustoServiceError - Table 'NonExistentTable' not found. Did you mean 'StormEvents' or 'PopulationData'?",
     }
-    
+
     return {
         "description": "Error handling with AI-powered suggestions",
         "error_request": error_request,
@@ -243,8 +249,8 @@ def example_error_scenarios() -> Dict[str, Any]:
         "ai_features": [
             "Suggests similar table names",
             "Provides context about available tables",
-            "Enhanced error messages with solutions"
-        ]
+            "Enhanced error messages with solutions",
+        ],
     }
 
 
@@ -252,32 +258,30 @@ def example_error_scenarios() -> Dict[str, Any]:
 # USAGE PATTERNS AND BEST PRACTICES
 # ============================================================================
 
+
 def usage_patterns():
     """Document common usage patterns and best practices."""
-    
+
     patterns = {
-        
         "workflow_2_development": [
             "1. Use visualize=True for data exploration",
             "2. Use visualize=False for production queries",
-            "3. Enable debug mode for troubleshooting"
+            "3. Enable debug mode for troubleshooting",
         ],
-        
         "workflow_3_performance": [
             "1. Run schema discovery once per cluster",
             "2. Use custom memory paths for project isolation",
-            "3. Disable context loading for high-frequency queries"
+            "3. Disable context loading for high-frequency queries",
         ],
-        
         "best_practices": [
             "Always authenticate with Azure CLI first (az login)",
-            "Use specific time ranges to limit query scope", 
+            "Use specific time ranges to limit query scope",
             "Enable schema context for development, disable for production",
             "Use force_refresh when cluster schema changes",
-            "Monitor memory file size for large clusters"
-        ]
+            "Monitor memory file size for large clusters",
+        ],
     }
-    
+
     return patterns
 
 
@@ -285,27 +289,28 @@ def usage_patterns():
 # MAIN EXAMPLE RUNNER
 # ============================================================================
 
+
 def main():
     """Run all examples and display their structure."""
-    
+
     examples = [
         example_basic_query(),
         example_json_processing(),
         example_security_analysis(),
         example_performance_optimized(),
         example_custom_memory_path(),
-        example_error_scenarios()
+        example_error_scenarios(),
     ]
-    
+
     print("=== MCP KQL Server Usage Examples ===\n")
-    
+
     for i, example in enumerate(examples, 1):
         print(f"Example {i}: {example['description']}")
         print(f"Request: {json.dumps(example['request'], indent=2)}")
-        if 'expected_response' in example:
+        if "expected_response" in example:
             print(f"Response: {json.dumps(example['expected_response'], indent=2)}")
         print("-" * 60)
-    
+
     print("\nUsage Patterns:")
     patterns = usage_patterns()
     for pattern_name, steps in patterns.items():

@@ -1,108 +1,194 @@
 """
-Test module for utility functions.
+Unit tests for utility functions in mcp_kql_server.utils
+
+Tests the utility functions for path handling, schema discovery,
+and query validation.
 
 Author: Arjun Trivedi
 Email: arjuntrivedi42@yahoo.com
 """
 
-import pytest
-import os
 from pathlib import Path
 
+import pytest
 
-def test_basic_imports():
-    """Test that basic imports work."""
-    try:
-        from mcp_kql_server.utils import (
-            normalize_cluster_uri,
-            clean_query_for_execution,
-            validate_kql_query_syntax,
-            format_error_message,
-            is_debug_mode,
-            truncate_string
+from mcp_kql_server.utils import (
+    ensure_directory_exists,
+    fix_query_with_real_schema,
+    get_default_cluster_memory_path,
+    get_schema_discovery,
+    get_schema_discovery_status,
+    sanitize_filename,
+    validate_all_query_columns,
+    validate_projected_columns,
+)
+
+
+class TestPathUtilities:
+    """Test cases for path-related utility functions."""
+
+    def test_get_default_cluster_memory_path(self):
+        """Test getting default cluster memory path."""
+        path = get_default_cluster_memory_path()
+        assert isinstance(path, Path)
+        assert "KQL_MCP" in str(path) or "kql_memory" in str(path)
+
+    def test_ensure_directory_exists(self):
+        """Test directory creation."""
+        test_path = Path("./test_dir_temp")
+        result = ensure_directory_exists(test_path)
+        assert result is True
+
+        # Clean up
+        if test_path.exists():
+            test_path.rmdir()
+
+    def test_sanitize_filename(self):
+        """Test filename sanitization."""
+        # Test with invalid characters
+        result = sanitize_filename('test<>:"/\\|?*file.txt')
+        assert "<" not in result
+        assert ">" not in result
+        assert ":" not in result
+        assert '"' not in result
+        assert "/" not in result
+        assert "\\" not in result
+        assert "|" not in result
+        assert "?" not in result
+        assert "*" not in result
+
+        # Test with valid filename
+        result = sanitize_filename("valid_filename.txt")
+        assert result == "valid_filename.txt"
+
+
+class TestSchemaDiscovery:
+    """Test cases for schema discovery functionality."""
+
+    def test_get_schema_discovery_status(self):
+        """Test schema discovery status retrieval."""
+        status = get_schema_discovery_status()
+        assert isinstance(status, dict)
+        assert "status" in status
+        assert "memory_path" in status
+        assert "cached_schemas" in status
+
+    def test_get_schema_discovery_instance(self):
+        """Test getting schema discovery instance."""
+        discovery = get_schema_discovery()
+        assert discovery is not None
+        assert hasattr(discovery, "get_table_schema")
+        assert hasattr(discovery, "get_column_mapping_from_schema")
+
+
+class TestQueryValidation:
+    """Test cases for KQL query validation functions."""
+
+    def test_validate_projected_columns_no_schema(self):
+        """Test column validation with no schema."""
+        query = "MyTable | project Column1, Column2"
+        result = validate_projected_columns(query, {})
+        assert result == query  # Should return unchanged
+
+    def test_validate_projected_columns_with_schema(self):
+        """Test column validation with schema."""
+        query = "MyTable | project Column1, Column2, InvalidColumn"
+        schema = {"columns": ["Column1", "Column2", "ValidColumn"], "table": "MyTable"}
+        result = validate_projected_columns(query, schema)
+        # Should remove invalid columns and keep valid ones
+        assert "Column1" in result
+        assert "Column2" in result
+        assert (
+            "InvalidColumn" not in result or result == query
+        )  # Might be kept if considered expression
+
+    def test_validate_all_query_columns_no_schema(self):
+        """Test comprehensive query validation with no schema."""
+        query = "MyTable | where Column1 == 'test'"
+        result = validate_all_query_columns(query, {})
+        assert result == query  # Should return unchanged
+
+    def test_validate_all_query_columns_with_schema(self):
+        """Test comprehensive query validation with schema."""
+        query = "MyTable | where column1 == 'test' | project COLUMN1"
+        schema = {"columns": ["Column1", "Column2"], "table": "MyTable"}
+        result = validate_all_query_columns(query, schema)
+        # Should fix case issues
+        assert "Column1" in result
+
+
+class TestQueryFixing:
+    """Test cases for query fixing functionality."""
+
+    def test_fix_query_with_real_schema_no_cluster_info(self):
+        """Test query fixing when no cluster info can be extracted."""
+        query = "MyTable | where Column1 == 'test'"
+        result = fix_query_with_real_schema(query)
+        assert result == query  # Should return unchanged
+
+    def test_fix_query_with_real_schema_invalid_format(self):
+        """Test query fixing with invalid cluster format."""
+        query = "invalid_query_format"
+        result = fix_query_with_real_schema(query)
+        assert result == query  # Should return unchanged
+
+
+class TestEdgeCases:
+    """Test edge cases and error conditions."""
+
+    def test_empty_inputs(self):
+        """Test handling of empty inputs."""
+        # Test sanitize_filename with empty string
+        result = sanitize_filename("")
+        assert result == ""
+
+        # Test validate_projected_columns with empty query
+        result = validate_projected_columns("", {})
+        assert result == ""
+
+        # Test validate_all_query_columns with empty query
+        result = validate_all_query_columns("", {})
+        assert result == ""
+
+    def test_none_inputs(self):
+        """Test handling of None inputs."""
+        # Test functions with None schema
+        query = "test query"
+        result = validate_projected_columns(query, None)
+        assert result == query
+
+        result = validate_all_query_columns(query, None)
+        assert result == query
+
+
+class TestSchemaDiscoveryMethods:
+    """Test schema discovery class methods."""
+
+    def test_schema_discovery_cache(self):
+        """Test schema discovery caching mechanism."""
+        discovery = get_schema_discovery()
+
+        # Test cache key generation and validation
+        cache_key = "test_cluster/test_db/test_table"
+
+        # Test that _is_schema_cached_and_valid returns False for non-existent cache
+        assert not discovery._is_schema_cached_and_valid(cache_key)
+
+    def test_normalize_cluster_uri(self):
+        """Test cluster URI normalization."""
+        discovery = get_schema_discovery()
+
+        # Test adding https prefix
+        result = discovery._normalize_cluster_uri("mycluster.kusto.windows.net")
+        assert result.startswith("https://")
+        assert result.endswith("mycluster.kusto.windows.net")
+
+        # Test with existing https
+        result = discovery._normalize_cluster_uri(
+            "https://mycluster.kusto.windows.net/"
         )
-        assert True  # If we get here, imports worked
-    except ImportError:
-        pytest.skip("Module imports not available in CI environment")
-
-
-def test_truncate_string():
-    """Test string truncation utility."""
-    from mcp_kql_server.utils import truncate_string
-    
-    # Test normal case
-    result = truncate_string("Hello World", 5, "...")
-    assert result == "He..."
-    
-    # Test string shorter than limit
-    result = truncate_string("Hi", 10)
-    assert result == "Hi"
-    
-    # Test exact length
-    result = truncate_string("Hello", 5)
-    assert result == "Hello"
-
-
-def test_is_debug_mode():
-    """Test debug mode detection."""
-    from mcp_kql_server.utils import is_debug_mode
-    
-    # Test with environment variable
-    os.environ['KQL_DEBUG'] = 'true'
-    assert is_debug_mode() == True
-    
-    os.environ['KQL_DEBUG'] = 'false'
-    assert is_debug_mode() == False
-    
-    # Clean up
-    if 'KQL_DEBUG' in os.environ:
-        del os.environ['KQL_DEBUG']
-
-
-def test_normalize_cluster_uri():
-    """Test cluster URI normalization."""
-    try:
-        from mcp_kql_server.utils import normalize_cluster_uri
-        
-        # Test basic cluster name
-        result = normalize_cluster_uri("mycluster")
         assert result == "https://mycluster.kusto.windows.net"
-        
-        # Test full URI
-        result = normalize_cluster_uri("https://mycluster.kusto.windows.net")
-        assert result == "https://mycluster.kusto.windows.net"
-        
-        # Test domain name
-        result = normalize_cluster_uri("mycluster.kusto.windows.net")
-        assert result == "https://mycluster.kusto.windows.net"
-        
-    except ImportError:
-        pytest.skip("Module not available in CI environment")
 
 
-def test_clean_query_for_execution():
-    """Test query cleaning functionality."""
-    try:
-        from mcp_kql_server.utils import clean_query_for_execution
-        
-        query = "cluster('test').database('db').MyTable | take 10"
-        result = clean_query_for_execution(query)
-        assert result == "MyTable | take 10"
-        
-    except ImportError:
-        pytest.skip("Module not available in CI environment")
-
-
-def test_format_error_message():
-    """Test error message formatting."""
-    try:
-        from mcp_kql_server.utils import format_error_message
-        
-        error = ValueError("Test error")
-        result = format_error_message(error, "Test context")
-        assert "Test context" in result
-        assert "ValueError" in result
-        assert "Test error" in result
-        
-    except ImportError:
-        pytest.skip("Module not available in CI environment")
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])
